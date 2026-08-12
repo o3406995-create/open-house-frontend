@@ -1,18 +1,19 @@
 type PrimaryButtonProps = {
-  text: string
-  onClick: () => void
-}
+  text: string;
+  onClick: () => void;
+};
 
-export const PrimaryButton = ({
-  text,
-  onClick,
-}: PrimaryButtonProps) => {
+const PrimaryButton = ({ text, onClick }: PrimaryButtonProps) => {
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+      className="w-full rounded-lg bg-blue-800 py-5 text-sm font-semibold text-white hover:bg-blue-700"
+
     >
       {text}
     </button>
-  )
-}
+  );
+};
+
+export default PrimaryButton
+

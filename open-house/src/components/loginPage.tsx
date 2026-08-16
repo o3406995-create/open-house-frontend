@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { InputField } from "../utils/InputField";
 import PrimaryButton from "../utils/PrimaryButton";
 import { SocialButton } from "../utils/SocialButton";
-import { loginPageConstants } from "../common";
+import { loginPageConstants } from "../common/constants";
 
 
 const getStoredToken = () => localStorage.getItem(loginPageConstants.AUTH_TOKEN_KEY);

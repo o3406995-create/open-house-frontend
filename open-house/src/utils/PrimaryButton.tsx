@@ -1,5 +1,6 @@
+
 type PrimaryButtonProps = {
-  text: string;
+  text: React.ReactNode;
   onClick: () => void;
 };
 

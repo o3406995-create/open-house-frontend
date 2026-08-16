@@ -4,20 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { InputField } from "../utils/InputField";
 import PrimaryButton from "../utils/PrimaryButton";
 import { SocialButton } from "../utils/SocialButton";
+import { loginPageConstants } from "../common";
 
-const AUTH_TOKEN_KEY = "authToken";
-const USER_KEY = "user";
-const DEMO_EMAIL = "test@example.com";
-const DEMO_PASSWORD = "123456";
 
-const getStoredToken = () => localStorage.getItem(AUTH_TOKEN_KEY);
+const getStoredToken = () => localStorage.getItem(loginPageConstants.AUTH_TOKEN_KEY);
 
 const setAuthToken = (token: string | null) => {
   if (token) {
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem(loginPageConstants.AUTH_TOKEN_KEY, token);
     axios.defaults.headers.common.Authorization = `Bearer ${token}`;
   } else {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(loginPageConstants.AUTH_TOKEN_KEY);
     delete axios.defaults.headers.common.Authorization;
   }
 };
@@ -48,17 +45,17 @@ const LoginPage = () => {
     }
 
     if (
-      trimmedEmail.toLowerCase() === DEMO_EMAIL.toLowerCase() &&
-      password === DEMO_PASSWORD
+      trimmedEmail.toLowerCase() === loginPageConstants.DEMO_EMAIL.toLowerCase() &&
+      password === loginPageConstants.DEMO_PASSWORD
     ) {
       const demoUser = {
         id: 1,
-        email: DEMO_EMAIL,
+        email: loginPageConstants.DEMO_EMAIL,
         name: "Demo User",
       };
 
       setAuthToken("demo-token");
-      localStorage.setItem(USER_KEY, JSON.stringify(demoUser));
+      localStorage.setItem(loginPageConstants.USER_KEY, JSON.stringify(demoUser));
       navigate("/");
       return;
     }
@@ -88,7 +85,7 @@ const LoginPage = () => {
       setAuthToken(token);
 
       if (response.data?.user) {
-        localStorage.setItem(USER_KEY, JSON.stringify(response.data.user));
+        localStorage.setItem(loginPageConstants.USER_KEY, JSON.stringify(response.data.user));
       }
 
       navigate("/");
@@ -103,6 +100,7 @@ const LoginPage = () => {
     }
   };
 
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50">
       <div className="w-full max-w-sm">
@@ -112,10 +110,10 @@ const LoginPage = () => {
           </div>
 
           <h1 className="text-2xl font-semibold text-slate-900">
-            Welcome Back
+            {loginPageConstants.WELCOME_MESSAGE}
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500">Sign in to your account</p>
+          <p className="mt-2 text-sm text-slate-500">{loginPageConstants.SIGN_HINT}</p>
         </div>
 
         <div className="space-y-4">
@@ -138,20 +136,20 @@ const LoginPage = () => {
         <div className="mt-4 flex items-center justify-between text-sm">
           <label className="flex items-center gap-2 text-slate-600">
             <input type="checkbox" className="h-4 w-4" />
-            Remember me
+            {loginPageConstants.REMEMBER}
           </label>
 
           <a
             href="/forgot-password"
             className="font-medium text-blue-600 hover:underline"
           >
-            Forgot password?
+            {loginPageConstants.FORGET}
           </a>
         </div>
 
         <div className="mt-6">
           <PrimaryButton
-            text={isLoading ? "Signing in..." : "Sign In"}
+            text={isLoading ? loginPageConstants.LOADING : loginPageConstants.SIGN_IN}
             onClick={handleLogin}
           />
         </div>
@@ -163,7 +161,7 @@ const LoginPage = () => {
             href="/register"
             className="font-medium text-blue-600 hover:underline"
           >
-            Sign up
+            {loginPageConstants.SIGN_UP}
           </a>
         </p>
 

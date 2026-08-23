@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { InputField } from "../utils/InputField";
-import PrimaryButton from "../utils/PrimaryButton";
+import { Button } from "@westpac/ui/button";
 import { SocialButton } from "../utils/SocialButton";
 import { loginPageConstants } from "../common/constants";
 
@@ -148,10 +148,9 @@ const LoginPage = () => {
         </div>
 
         <div className="mt-6">
-          <PrimaryButton
-            text={isLoading ? loginPageConstants.LOADING : loginPageConstants.SIGN_IN}
-            onClick={handleLogin}
-          />
+          <Button look="hero" onClick={handleLogin}>
+            {isLoading ? loginPageConstants.LOADING : loginPageConstants.SIGN_IN}
+          </Button>
         </div>
 
         {/* Sign up */}

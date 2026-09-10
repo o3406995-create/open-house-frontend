@@ -1,24 +1,19 @@
 import type { ReactNode } from "react"
+import { Button } from "@/components/ui/button"
 
-type SocialButtonProps = {
-  text: string
+interface SocialButtonProps {
   icon: ReactNode
+  text: string
   onClick: () => void
 }
 
-export const SocialButton = ({
-  text,
-  icon,
-  onClick,
-}: SocialButtonProps) => {
+// Full-width outline button used for third-party sign-in options
+// (Google, Apple, etc). Pass the brand icon as a node and the label as text.
+export function SocialButton({ icon, text, onClick }: SocialButtonProps) {
   return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-    >
+    <Button variant="outline" className="w-full gap-2" onClick={onClick}>
       {icon}
-
       {text}
-    </button>
+    </Button>
   )
 }

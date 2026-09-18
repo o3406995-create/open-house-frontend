@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { SocialButton } from "@/utils/SocialButton"
 import { loginPageConstants } from "@/common/constants"
 import { GoogleIcon, AppleIcon } from "@/utils/icons"
+import { authApi } from "@/api/auth"
+import { getApiErrorMessage } from "@/api/errors"
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -29,37 +31,18 @@ export default function LoginPage() {
       setIsLoading(true)
       setError("")
 
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || ""
-      const response = await axios.post(`${baseUrl}/api/auth/login`, {
+      const { token, user } = await authApi.login({
         email: trimmedEmail,
         password,
       })
-
-      const token =
-        response.data?.token ||
-        response.data?.accessToken ||
-        response.data?.data?.token ||
-        response.data?.data?.accessToken
-
-      if (!token) {
-        throw new Error(loginPageConstants.TOKEN_NOT_FOUND)
-      }
-
+ 
       localStorage.setItem(loginPageConstants.AUTH_TOKEN_KEY, token)
-      axios.defaults.headers.common.Authorization = `Bearer ${token}`
-
-      if (response.data?.user) {
-        localStorage.setItem(
-          loginPageConstants.USER_KEY,
-          JSON.stringify(response.data.user),
-        )
-      }
-
+      localStorage.setItem(loginPageConstants.USER_KEY, JSON.stringify(user))
+ 
       navigate("/")
+   
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : loginPageConstants.LOGIN_FAILED
-      setError(message)
+      setError(getApiErrorMessage(err, loginPageConstants.LOGIN_FAILED))
     } finally {
       setIsLoading(false)
     }

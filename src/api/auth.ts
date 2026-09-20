@@ -7,19 +7,9 @@ import type {
 } from "./types"
 
 export const authApi = {
-  login: async (payload: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>(
-      "/api/auth/login",
-      payload,
-    )
-    return response.data
-  },
+  login: (payload: LoginRequest): Promise<LoginResponse> =>
+    apiClient.post<LoginResponse>("/api/auth/login", payload),
 
-  register: async (payload: RegisterRequest): Promise<RegisterResponse> => {
-    const response = await apiClient.post<RegisterResponse>(
-      "/api/auth/register",
-      payload,
-    )
-    return response.data
-  },
+  register: (payload: RegisterRequest): Promise<RegisterResponse> =>
+    apiClient.post<RegisterResponse>("/api/auth/register", payload),
 }

@@ -5,7 +5,7 @@ import './index.css'
 import App from './App.tsx'
 import Home from './pages/Home.tsx'
 import ContactUs from './pages/ContactUs.tsx'
-import LoginPage from './components/loginPage.tsx'
+import LoginPage from './pages/loginPage.tsx'
 
 
 createRoot(document.getElementById('root')!).render(

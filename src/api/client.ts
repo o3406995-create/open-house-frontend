@@ -1,32 +1,77 @@
-import axios from "axios"
 import { loginPageConstants } from "@/common/constants"
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
+const baseURL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "")
 
-export const apiClient = axios.create({
-  baseURL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-})
+export class ApiError extends Error {
+  status: number
+  data: unknown
 
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem(loginPageConstants.AUTH_TOKEN_KEY)
+  constructor(status: number, message: string, data?: unknown) {
+    super(message)
+    this.name = "ApiError"
+    this.status = status
+    this.data = data
+  }
+}
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+interface RequestOptions {
+  method?: string
+  body?: unknown
+  headers?: Record<string, string>
+  signal?: AbortSignal
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { method = "GET", body, headers, signal } = options
+
+  const res = await fetch(`${baseURL}${path}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+    signal,
+    credentials: "include",
+  })
+
+  
+  const text = await res.text()
+  let data: unknown = null
+  if (text) {
+    try {
+      data = JSON.parse(text)
+    } catch {
+      data = text
+    }
   }
 
-  return config
-})
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      localStorage.removeItem(loginPageConstants.AUTH_TOKEN_KEY)
+  if (!res.ok) {
+    if (res.status === 401) {
       localStorage.removeItem(loginPageConstants.USER_KEY)
     }
-    return Promise.reject(error)
-  },
-)
+    const message =
+      typeof data === "object" &&
+      data !== null &&
+      "message" in data &&
+      typeof (data as { message: unknown }).message === "string"
+        ? (data as { message: string }).message
+        : `Request failed with status code ${res.status}`
+    throw new ApiError(res.status, message, data)
+  }
+
+  return data as T
+}
+
+type Opts = Omit<RequestOptions, "method" | "body">
+
+export const apiClient = {
+  get: <T>(path: string, opts?: Opts) => request<T>(path, { ...opts, method: "GET" }),
+  post: <T>(path: string, body?: unknown, opts?: Opts) =>
+    request<T>(path, { ...opts, method: "POST", body }),
+  put: <T>(path: string, body?: unknown, opts?: Opts) =>
+    request<T>(path, { ...opts, method: "PUT", body }),
+  patch: <T>(path: string, body?: unknown, opts?: Opts) =>
+    request<T>(path, { ...opts, method: "PATCH", body }),
+  delete: <T>(path: string, opts?: Opts) => request<T>(path, { ...opts, method: "DELETE" }),
+}

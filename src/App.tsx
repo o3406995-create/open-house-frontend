@@ -1,7 +1,20 @@
+import { useEffect } from 'react'
 import { Link, Outlet } from 'react-router-dom'
+import { useGetCurrentUserQuery } from '@/store/authApi'
+import { useAppDispatch } from '@/store/hooks'
+import { setUser } from '@/store/authSlice'
 import './App.css'
 
 function App() {
+  const dispatch = useAppDispatch()
+  const { data, isSuccess } = useGetCurrentUserQuery()
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      dispatch(setUser(data.user))
+    }
+  }, [isSuccess, data, dispatch])
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-xl">

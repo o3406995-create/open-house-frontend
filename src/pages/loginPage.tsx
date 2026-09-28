@@ -10,9 +10,12 @@ import { loginPageConstants } from "@/common/constants"
 import { GoogleIcon, AppleIcon } from "@/utils/icons"
 import { authApi } from "@/api/auth"
 import { getApiErrorMessage } from "@/api/errors"
+import { useAppDispatch } from "@/store/hooks"
+import { setUser } from "@/store/authSlice"
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -35,7 +38,7 @@ export default function LoginPage() {
         password,
       })
  
-      localStorage.setItem(loginPageConstants.USER_KEY, JSON.stringify(user))
+      dispatch(setUser(user))
  
       navigate("/")
    

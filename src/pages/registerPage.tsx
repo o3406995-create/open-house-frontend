@@ -11,6 +11,8 @@ import { authApi } from "@/api/auth"
 import { ApiError } from "@/api/client"
 import { getApiErrorMessage } from "@/api/errors"
 import type { ApiValidationError } from "@/api/types"
+import { useAppDispatch } from '@/store/hooks'
+import { setUser } from "@/store/authSlice"
 
 type FieldName = "name" | "email" | "password" | "confirmPassword"
 type FieldErrors = Partial<Record<FieldName, string>>
@@ -33,6 +35,7 @@ function getServerFieldErrors(err: unknown): FieldErrors {
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -74,7 +77,10 @@ export default function RegisterPage() {
         password,
       })
 
+      dispatch(setUser(user))
+
       navigate("/")
+
     } catch (err: unknown) {
       const serverErrors = getServerFieldErrors(err)
       if (Object.keys(serverErrors).length > 0) {

@@ -74,8 +74,6 @@ export default function RegisterPage() {
         password,
       })
 
-      localStorage.setItem(loginPageConstants.USER_KEY, JSON.stringify(user))
-
       navigate("/")
     } catch (err: unknown) {
       const serverErrors = getServerFieldErrors(err)

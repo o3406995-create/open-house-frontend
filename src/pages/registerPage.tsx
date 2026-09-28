@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { SocialButton } from "@/utils/SocialButton"
 import { GoogleIcon, AppleIcon } from "@/utils/icons"
-import { registerPageConstants as C } from "@/common/constants"
+import { loginPageConstants, registerPageConstants as C } from "@/common/constants"
 import { authApi } from "@/api/auth"
 import { ApiError } from "@/api/client"
 import { getApiErrorMessage } from "@/api/errors"
@@ -78,7 +78,9 @@ export default function RegisterPage() {
       })
 
       dispatch(setUser(user))
-      navigate("/login")
+
+      navigate("/")
+
     } catch (err: unknown) {
       const serverErrors = getServerFieldErrors(err)
       if (Object.keys(serverErrors).length > 0) {

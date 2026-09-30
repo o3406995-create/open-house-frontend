@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react"
+import { useForm } from "react-hook-form"
 import { useNavigate, Link } from "react-router-dom"
 import { Home, User, Mail, Lock } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -6,26 +6,31 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { SocialButton } from "@/utils/SocialButton"
 import { GoogleIcon, AppleIcon } from "@/utils/icons"
-import { loginPageConstants, registerPageConstants as C } from "@/common/constants"
+import { registerPageConstants as C } from "@/common/constants"
 import { authApi } from "@/api/auth"
 import { ApiError } from "@/api/client"
 import { getApiErrorMessage } from "@/api/errors"
 import type { ApiValidationError } from "@/api/types"
-import { useAppDispatch } from '@/store/hooks'
+import { useAppDispatch } from "@/store/hooks"
 import { setUser } from "@/store/authSlice"
-
-type FieldName = "name" | "email" | "password" | "confirmPassword"
-type FieldErrors = Partial<Record<FieldName, string>>
+import { useState } from "react"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function getServerFieldErrors(err: unknown): FieldErrors {
+interface RegisterFormValues {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+function getServerFieldErrors(err: unknown): Partial<Record<keyof RegisterFormValues, string>> {
   if (!(err instanceof ApiError) || err.status !== 400) return {}
 
   const errors = (err.data as ApiValidationError | null)?.errors
   if (!errors) return {}
 
-  const result: FieldErrors = {}
+  const result: Partial<Record<keyof RegisterFormValues, string>> = {}
   for (const key of ["name", "email", "password"] as const) {
     const message = errors[key]?.[0]
     if (message) result[key] = message
@@ -36,60 +41,39 @@ function getServerFieldErrors(err: unknown): FieldErrors {
 export default function RegisterPage() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
 
-  const validate = (): FieldErrors => {
-    const errors: FieldErrors = {}
-    const trimmedEmail = email.trim()
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setError: setFieldError,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormValues>()
 
-    if (!name.trim()) errors.name = C.NAME_REQUIRED
+  const password = watch("password")
 
-    if (!trimmedEmail) errors.email = C.EMAIL_REQUIRED
-    else if (!EMAIL_REGEX.test(trimmedEmail)) errors.email = C.EMAIL_INVALID
-
-    if (password.length < C.PASSWORD_MIN_LENGTH) errors.password = C.PASSWORD_MIN
-
-    if (confirmPassword !== password) errors.confirmPassword = C.PASSWORD_MISMATCH
-
-    return errors
-  }
-
-  const handleRegister = async (e: FormEvent) => {
-    e.preventDefault()
-
-    const errors = validate()
-    setFieldErrors(errors)
+  const onSubmit = async (data: RegisterFormValues) => {
     setError("")
-    if (Object.keys(errors).length > 0) return
 
     try {
-      setIsLoading(true)
-
       const { user } = await authApi.register({
-        name: name.trim(),
-        email: email.trim(),
-        password,
+        name: data.name.trim(),
+        email: data.email.trim(),
+        password: data.password,
       })
 
       dispatch(setUser(user))
-
       navigate("/")
-
     } catch (err: unknown) {
       const serverErrors = getServerFieldErrors(err)
       if (Object.keys(serverErrors).length > 0) {
-        setFieldErrors(serverErrors)
+        for (const [field, message] of Object.entries(serverErrors)) {
+          setFieldError(field as keyof RegisterFormValues, { message })
+        }
       } else {
         setError(getApiErrorMessage(err, C.REGISTER_FAILED))
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -105,7 +89,7 @@ export default function RegisterPage() {
           <p className="mt-2 text-sm text-slate-500">{C.HINT}</p>
         </div>
 
-        <form onSubmit={handleRegister} noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="space-y-4">
             {/* Name */}
             <div className="space-y-1">
@@ -120,13 +104,12 @@ export default function RegisterPage() {
                   placeholder="Full name"
                   className="pl-9"
                   autoComplete="name"
-                  aria-invalid={!!fieldErrors.name}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  aria-invalid={!!errors.name}
+                  {...register("name", { required: C.NAME_REQUIRED })}
                 />
               </div>
-              {fieldErrors.name && (
-                <p className="text-xs text-red-600">{fieldErrors.name}</p>
+              {errors.name && (
+                <p className="text-xs text-red-600">{errors.name.message}</p>
               )}
             </div>
 
@@ -143,13 +126,15 @@ export default function RegisterPage() {
                   placeholder="Email address"
                   className="pl-9"
                   autoComplete="email"
-                  aria-invalid={!!fieldErrors.email}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  aria-invalid={!!errors.email}
+                  {...register("email", {
+                    required: C.EMAIL_REQUIRED,
+                    pattern: { value: EMAIL_REGEX, message: C.EMAIL_INVALID },
+                  })}
                 />
               </div>
-              {fieldErrors.email && (
-                <p className="text-xs text-red-600">{fieldErrors.email}</p>
+              {errors.email && (
+                <p className="text-xs text-red-600">{errors.email.message}</p>
               )}
             </div>
 
@@ -166,13 +151,14 @@ export default function RegisterPage() {
                   placeholder="Password (min 8 characters)"
                   className="pl-9"
                   autoComplete="new-password"
-                  aria-invalid={!!fieldErrors.password}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  aria-invalid={!!errors.password}
+                  {...register("password", {
+                    minLength: { value: C.PASSWORD_MIN_LENGTH, message: C.PASSWORD_MIN },
+                  })}
                 />
               </div>
-              {fieldErrors.password && (
-                <p className="text-xs text-red-600">{fieldErrors.password}</p>
+              {errors.password && (
+                <p className="text-xs text-red-600">{errors.password.message}</p>
               )}
             </div>
 
@@ -189,14 +175,15 @@ export default function RegisterPage() {
                   placeholder="Confirm password"
                   className="pl-9"
                   autoComplete="new-password"
-                  aria-invalid={!!fieldErrors.confirmPassword}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  aria-invalid={!!errors.confirmPassword}
+                  {...register("confirmPassword", {
+                    validate: (value) => value === password || C.PASSWORD_MISMATCH,
+                  })}
                 />
               </div>
-              {fieldErrors.confirmPassword && (
+              {errors.confirmPassword && (
                 <p className="text-xs text-red-600">
-                  {fieldErrors.confirmPassword}
+                  {errors.confirmPassword.message}
                 </p>
               )}
             </div>
@@ -210,9 +197,9 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? C.LOADING : C.SUBMIT}
+              {isSubmitting ? C.LOADING : C.SUBMIT}
             </Button>
           </div>
         </form>

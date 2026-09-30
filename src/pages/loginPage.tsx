@@ -12,40 +12,38 @@ import { authApi } from "@/api/auth"
 import { getApiErrorMessage } from "@/api/errors"
 import { useAppDispatch } from "@/store/hooks"
 import { setUser } from "@/store/authSlice"
+import { useForm } from "react-hook-form"
+
+interface LoginFormValues {
+  email: string
+  password: string
+}
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleLogin = async () => {
-    const trimmedEmail = email.trim()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>()
 
-    if (!trimmedEmail || !password.trim()) {
-      setError(loginPageConstants.EMPTY_FIELDS)
-      return
-    }
+  const onSubmit = async (data: LoginFormValues) => {
+    setError("")
 
     try {
-      setIsLoading(true)
-      setError("")
-
       const { user } = await authApi.login({
-        email: trimmedEmail,
-        password,
+        email: data.email.trim(),
+        password: data.password,
       })
  
       dispatch(setUser(user))
  
       navigate("/")
-   
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, loginPageConstants.LOGIN_FAILED))
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -66,6 +64,7 @@ export default function LoginPage() {
         </div>
 
         {/* Email / Password inputs */}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="sr-only">
@@ -78,8 +77,8 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Email address"
                 className="pl-9"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={!!errors.email}
+                {...register("email", { required: loginPageConstants.EMPTY_FIELDS})}
               />
             </div>
           </div>
@@ -95,8 +94,8 @@ export default function LoginPage() {
                 type="password"
                 placeholder="Password"
                 className="pl-9"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={!!errors.password}
+                {...register("password", { required: loginPageConstants.EMPTY_FIELDS})}
               />
             </div>
           </div>
@@ -117,18 +116,21 @@ export default function LoginPage() {
         </div>
 
         {/* Error message */}
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {(errors.email || errors.password) && <p className="mt-3 text-sm text-red-600">
+          {errors.email?.message ?? errors.password?.message}
+          </p>}
 
         {/* Sign In button */}
         <div className="mt-6">
           <Button
+            type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700"
-            onClick={handleLogin}
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
-            {isLoading ? loginPageConstants.LOADING : loginPageConstants.SIGN_IN}
+            {isSubmitting ? loginPageConstants.LOADING : loginPageConstants.SIGN_IN}
           </Button>
         </div>
+        </form>
 
         {/* Sign up link */}
         <p className="mt-5 text-center text-sm text-slate-500">

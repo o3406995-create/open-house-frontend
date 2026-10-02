@@ -9,7 +9,7 @@ export const authApi = createApi({
   }),
   endpoints: (builder) => ({
     getCurrentUser: builder.query<{ user: User }, void>({
-      query: () => "/auth/me",
+      query: () => "/users/me",
     }),
   }),
 })

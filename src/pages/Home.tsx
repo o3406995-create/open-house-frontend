@@ -7,13 +7,24 @@ import { mockGeocode } from "@/utils/mockGeocode"
 import heroImage from "@/assets/hero.jpg"
 import { homePageConstants as C } from "@/common/constants"
 
+interface MapCenter {
+  lat: number
+  lng: number
+}
+
 export default function Home() {
   const [searchProperties, { data: properties = [], isLoading }] = useSearchPropertiesMutation()
   const [filters, setFilters] = useState<FilterValues>({})
   const [lastSearch, setLastSearch] = useState<SearchBarValues | null>(null)
+  const [mapCenter, setMapCenter] = useState<MapCenter | null>(null)
+  const [mapRadiusMeters, setMapRadiusMeters] = useState(5000)
 
   const runSearch = async (barValues: SearchBarValues, appliedFilters: FilterValues) => {
     const { latitude, longitude } = await mockGeocode(barValues.address)
+
+    setMapCenter({ lat: latitude, lng: longitude })
+    setMapRadiusMeters(barValues.radiusMeters)
+
     await searchProperties({
       latitude,
       longitude,
@@ -55,7 +66,11 @@ export default function Home() {
 
       {/* Map, explicit height = viewport - navbar - hero, no flex inheritance involved */}
       <div className="h-[calc(100vh-57px-240px)] min-h-[300px]">
-        <MapPlaceholder properties={properties} />
+        <MapPlaceholder
+          properties={properties}
+          center={mapCenter ?? undefined}
+          radiusMeters={mapRadiusMeters}
+        />
       </div>
 
       {/* Floating card */}

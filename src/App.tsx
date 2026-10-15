@@ -3,8 +3,9 @@ import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { Home } from 'lucide-react'
 import { useGetCurrentUserQuery } from '@/store/authApi'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { setUser } from '@/store/authSlice'
+import { setUser, clearUser } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
+import { authApi } from '@/api/auth'
 import './App.css'
 
 function App() {
@@ -18,6 +19,16 @@ function App() {
       dispatch(setUser(data.user))
     }
   }, [isSuccess, data, dispatch])
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout()
+    } catch {
+      // Even if the backend call fails, still clear local state so the user can log out
+    }
+    dispatch(clearUser())
+    navigate('/')
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
@@ -49,7 +60,12 @@ function App() {
 
           <div className="flex items-center gap-2">
             {user ? (
-              <span className="text-sm font-medium text-slate-700">Hi, {user.name}</span>
+              <>
+                <span className="text-sm font-medium text-slate-700">Hi, {user.name}</span>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  Log out
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>

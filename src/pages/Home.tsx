@@ -7,19 +7,38 @@ import { mockGeocode } from "@/utils/mockGeocode"
 import heroImage from "@/assets/hero.jpg"
 import { homePageConstants as C } from "@/common/constants"
 
+const MIN_LOADING_MS = 2000
+
 export default function Home() {
-  const [searchProperties, { data: properties = [], isLoading }] = useSearchPropertiesMutation()
+  const [searchProperties, { data: properties = [] }] = useSearchPropertiesMutation()
   const [filters, setFilters] = useState<FilterValues>({})
   const [lastSearch, setLastSearch] = useState<SearchBarValues | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchError, setSearchError] = useState("")
 
   const runSearch = async (barValues: SearchBarValues, appliedFilters: FilterValues) => {
-    const { latitude, longitude } = await mockGeocode(barValues.address)
-    await searchProperties({
-      latitude,
-      longitude,
-      radiusMeters: barValues.radiusMeters,
-      ...appliedFilters,
-    })
+    setIsSearching(true)
+    setSearchError("")
+    const startedAt = Date.now()
+
+    try {
+      const { latitude, longitude } = await mockGeocode(barValues.address)
+
+      await searchProperties({
+        latitude,
+        longitude,
+        radiusMeters: barValues.radiusMeters,
+        ...appliedFilters,
+      }).unwrap()
+    } catch {
+      setSearchError("Search failed. Please try again.")
+    } finally {
+      const elapsed = Date.now() - startedAt
+      if (elapsed < MIN_LOADING_MS) {
+        await new Promise((resolve) => setTimeout(resolve, MIN_LOADING_MS - elapsed))
+      }
+      setIsSearching(false)
+    }
   }
 
   const handleSearch = (values: SearchBarValues) => {
@@ -28,14 +47,12 @@ export default function Home() {
   }
 
   const handleFilterChange = (newFilters: FilterValues) => {
-    const merged = { ...filters, ...newFilters }
-    setFilters(merged)
-    if (lastSearch) runSearch(lastSearch, merged)
+    setFilters(newFilters)
+    if (lastSearch) runSearch(lastSearch, newFilters)
   }
 
   return (
     <div className="relative">
-      {/* Hero image */}
       <div
         className="flex h-[240px] flex-col justify-start bg-cover bg-center px-6 pt-4"
         style={{ backgroundImage: `url(${heroImage})` }}
@@ -47,23 +64,24 @@ export default function Home() {
             <br />
             {C.HERO_TITLE_LINE_2}
           </p>
-          <p className="mt-2 max-w-md text-sm text-white/90">
-            {C.HERO_SUBTITLE}
-          </p>
+          <p className="mt-2 max-w-md text-sm text-white/90">{C.HERO_SUBTITLE}</p>
         </div>
       </div>
 
-      {/* Map, explicit height = viewport - navbar - hero, no flex inheritance involved */}
       <div className="h-[calc(100vh-57px-240px)] min-h-[300px]">
         <MapPlaceholder properties={properties} />
       </div>
 
-      {/* Floating card */}
       <div className="absolute left-1/2 top-[180px] z-10 w-full max-w-5xl -translate-x-1/2 px-6">
         <div className="rounded-2xl bg-white p-2 shadow-xl">
-          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+          <SearchBar onSearch={handleSearch} isLoading={isSearching} />
           <SearchFilterBar onChange={handleFilterChange} />
         </div>
+        {searchError && (
+          <p className="mt-2 rounded-lg bg-white px-3 py-2 text-sm text-red-600 shadow">
+            {searchError}
+          </p>
+        )}
       </div>
     </div>
   )

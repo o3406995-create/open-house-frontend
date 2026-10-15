@@ -57,6 +57,8 @@ export const propertiesApi = createApi({
         method: "POST",
         body: params,
       }),
+      transformResponse: (response: { properties: PropertyDTO[] }) => response.properties,
+
     }),
   }),
 })

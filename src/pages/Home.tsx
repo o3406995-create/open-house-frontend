@@ -7,12 +7,17 @@ import { mockGeocode } from "@/utils/mockGeocode"
 import heroImage from "@/assets/hero.jpg"
 import { homePageConstants as C } from "@/common/constants"
 
-const MIN_LOADING_MS = 2000
+interface MapCenter {
+  lat: number
+  lng: number
+}
 
 export default function Home() {
   const [searchProperties, { data: properties = [] }] = useSearchPropertiesMutation()
   const [filters, setFilters] = useState<FilterValues>({})
   const [lastSearch, setLastSearch] = useState<SearchBarValues | null>(null)
+  const [mapCenter, setMapCenter] = useState<MapCenter | null>(C.DEFAULT_MAP_CENTER)
+  const [mapRadiusMeters, setMapRadiusMeters] = useState(C.DEFAULT_RADIUS_METERS)
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState("")
 
@@ -24,6 +29,9 @@ export default function Home() {
     try {
       const { latitude, longitude } = await mockGeocode(barValues.address)
 
+      setMapCenter({ lat: latitude, lng: longitude })
+      setMapRadiusMeters(barValues.radiusMeters)
+
       await searchProperties({
         latitude,
         longitude,
@@ -34,8 +42,8 @@ export default function Home() {
       setSearchError("Search failed. Please try again.")
     } finally {
       const elapsed = Date.now() - startedAt
-      if (elapsed < MIN_LOADING_MS) {
-        await new Promise((resolve) => setTimeout(resolve, MIN_LOADING_MS - elapsed))
+      if (elapsed < C.MIN_LOADING_MS) {
+        await new Promise((resolve) => setTimeout(resolve, C.MIN_LOADING_MS - elapsed))
       }
       setIsSearching(false)
     }
@@ -69,7 +77,11 @@ export default function Home() {
       </div>
 
       <div className="h-[calc(100vh-57px-240px)] min-h-[300px]">
-        <MapPlaceholder properties={properties} />
+        <MapPlaceholder
+          properties={properties}
+          center={mapCenter ?? undefined}
+          radiusMeters={mapRadiusMeters}
+        />
       </div>
 
       <div className="absolute left-1/2 top-[180px] z-10 w-full max-w-5xl -translate-x-1/2 px-6">

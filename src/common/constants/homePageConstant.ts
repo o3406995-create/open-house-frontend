@@ -44,4 +44,17 @@ export const HOMEPAGE_CONSTANTS = {
   LEGEND_OPEN_HOUSE: "Open House",
   LEGEND_NO_OPEN_HOUSE: "Property, No upcoming OH",
   FIND_AGENTS_BUTTON: "Find Agents in This Area",
+
+  // Search behavior
+  MIN_LOADING_MS: 2000,
+
+  // Map defaults
+  DEFAULT_MAP_CENTER: { lat: -27.4698, lng: 153.0251 }, // Brisbane CBD
+  DEFAULT_RADIUS_METERS: 5000,
+  DEFAULT_MAP_ZOOM: 13,
+
+  // Map marker/circle colors
+  MAP_COLOR_OPEN_HOUSE: "#ef4444",
+  MAP_COLOR_NO_OPEN_HOUSE: "#3b82f6",
+  MAP_COLOR_RADIUS_CIRCLE: "#3b82f6",
 }

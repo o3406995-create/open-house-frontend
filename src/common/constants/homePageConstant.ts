@@ -10,6 +10,13 @@ export const HOMEPAGE_CONSTANTS = {
   SEARCH_BUTTON: "Search",
   SEARCHING: "Searching...",
 
+  // Search validation
+  SEARCH_ERROR_EMPTY: "Please enter an address, suburb or postcode.",
+  SEARCH_ERROR_TOO_SHORT: "Please enter at least 3 characters.",
+  SEARCH_ERROR_INVALID_CHARS: "Address contains invalid characters.",
+  MIN_ADDRESS_LENGTH: 3,
+  SEARCH_BUTTON_WIDTH_PX: 110,
+
   // Radius options
   RADIUS_1KM: "Within 1 km",
   RADIUS_2KM: "Within 2 km",
@@ -47,6 +54,8 @@ export const HOMEPAGE_CONSTANTS = {
 
   // Search behavior
   MIN_LOADING_MS: 2000,
+
+  SEARCH_DEBOUNCE_MS: 1000,
 
   // Map defaults
   DEFAULT_MAP_CENTER: { lat: -27.4698, lng: 153.0251 }, // Brisbane CBD

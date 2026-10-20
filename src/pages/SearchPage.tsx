@@ -1,18 +1,18 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import SearchBar, { type SearchBarValues } from "@/components/search/searchBar"
 import SearchFilterBar, { type FilterValues } from "@/components/search/searchFilterBar"
 import MapPlaceholder from "@/components/search/mapPlaceholder"
 import { useSearchPropertiesMutation } from "@/store/propertiesApi"
 import { mockGeocode } from "@/utils/mockGeocode"
 import heroImage from "@/assets/hero.jpg"
-import { homePageConstants as C } from "@/common/constants"
+import { searchPageConstants as C } from "@/common/constants"
 
 interface MapCenter {
   lat: number
   lng: number
 }
 
-export default function Home() {
+export default function SearchPage() {
   const [searchProperties, { data: properties = [] }] = useSearchPropertiesMutation()
   const [filters, setFilters] = useState<FilterValues>({})
   const [lastSearch, setLastSearch] = useState<SearchBarValues | null>(null)
@@ -20,8 +20,15 @@ export default function Home() {
   const [mapRadiusMeters, setMapRadiusMeters] = useState(C.DEFAULT_RADIUS_METERS)
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState("")
+  const lastSearchAtRef = useRef(0)
 
   const runSearch = async (barValues: SearchBarValues, appliedFilters: FilterValues) => {
+    const now = Date.now()
+    if (now - lastSearchAtRef.current < C.SEARCH_DEBOUNCE_MS) {
+      return
+    }
+    lastSearchAtRef.current = now
+
     setIsSearching(true)
     setSearchError("")
     const startedAt = Date.now()

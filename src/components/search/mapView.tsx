@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { GoogleMap, Marker, Circle, InfoWindow } from "@react-google-maps/api"
 import type { PropertyDTO } from "@/store/propertiesApi"
-import { homePageConstants as C } from "@/common/constants"
+import { searchPageConstants as C } from "@/common/constants"
 
 interface MapViewProps {
   properties: PropertyDTO[]

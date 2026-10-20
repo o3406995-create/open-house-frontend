@@ -1,3 +1,4 @@
 export { LOGINPAGE_CONSTANTS as loginPageConstants } from './loginPageConstant';
 export { REGISTERPAGE_CONSTANTS as registerPageConstants } from './registerPageConstant';
-export { HOMEPAGE_CONSTANTS as homePageConstants } from './homePageConstant';
+export { SEARCHPAGE_CONSTANTS as searchPageConstants } from './searchPageConstant';
+export { NAVBAR_CONSTANTS as navbarConstants } from './navBarConstants';

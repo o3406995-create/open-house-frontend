@@ -1,4 +1,4 @@
-export const HOMEPAGE_CONSTANTS = {
+export const SEARCHPAGE_CONSTANTS = {
   // Hero section
   HERO_TITLE_LINE_1: "Find Your Next",
   HERO_TITLE_LINE_2: "Open House",
@@ -9,6 +9,11 @@ export const HOMEPAGE_CONSTANTS = {
   ADDRESS_PLACEHOLDER: "Address, suburb or postcode",
   SEARCH_BUTTON: "Search",
   SEARCHING: "Searching...",
+
+  // Search validation
+  SEARCH_ERROR_INVALID: "Please enter a valid address.",
+  MIN_ADDRESS_LENGTH: 3,
+  SEARCH_BUTTON_WIDTH_PX: 110,
 
   // Radius options
   RADIUS_1KM: "Within 1 km",
@@ -47,6 +52,7 @@ export const HOMEPAGE_CONSTANTS = {
 
   // Search behavior
   MIN_LOADING_MS: 2000,
+  SEARCH_DEBOUNCE_MS: 1000,
 
   // Map defaults
   DEFAULT_MAP_CENTER: { lat: -27.4698, lng: 153.0251 }, // Brisbane CBD

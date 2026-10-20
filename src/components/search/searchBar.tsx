@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { homePageConstants as C } from "@/common/constants"
+import { searchPageConstants as C } from "@/common/constants"
 
 export interface SearchBarValues {
   address: string
@@ -34,19 +34,11 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
     e.preventDefault()
 
     const trimmed = address.trim()
+    const isValid =
+      trimmed.length >= C.MIN_ADDRESS_LENGTH && ADDRESS_PATTERN.test(trimmed)
 
-    if (trimmed.length === 0) {
-      setValidationError(C.SEARCH_ERROR_EMPTY)
-      return
-    }
-
-    if (trimmed.length < C.MIN_ADDRESS_LENGTH) {
-      setValidationError(C.SEARCH_ERROR_TOO_SHORT)
-      return
-    }
-
-    if (!ADDRESS_PATTERN.test(trimmed)) {
-      setValidationError(C.SEARCH_ERROR_INVALID_CHARS)
+    if (!isValid) {
+      setValidationError(C.SEARCH_ERROR_INVALID)
       return
     }
 

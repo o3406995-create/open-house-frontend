@@ -1,7 +1,7 @@
 import { useJsApiLoader } from "@react-google-maps/api"
 import { Users } from "lucide-react"
 import type { PropertyDTO } from "@/store/propertiesApi"
-import { homePageConstants as C } from "@/common/constants"
+import { searchPageConstants as C } from "@/common/constants"
 import MapView from "./mapView"
 
 interface mapPlaceholderProps {

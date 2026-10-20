@@ -5,14 +5,14 @@ import MapPlaceholder from "@/components/search/mapPlaceholder"
 import { useSearchPropertiesMutation } from "@/store/propertiesApi"
 import { mockGeocode } from "@/utils/mockGeocode"
 import heroImage from "@/assets/hero.jpg"
-import { homePageConstants as C } from "@/common/constants"
+import { searchPageConstants as C } from "@/common/constants"
 
 interface MapCenter {
   lat: number
   lng: number
 }
 
-export default function Home() {
+export default function SearchPage() {
   const [searchProperties, { data: properties = [] }] = useSearchPropertiesMutation()
   const [filters, setFilters] = useState<FilterValues>({})
   const [lastSearch, setLastSearch] = useState<SearchBarValues | null>(null)

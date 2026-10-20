@@ -1,4 +1,4 @@
-export const HOMEPAGE_CONSTANTS = {
+export const SEARCHPAGE_CONSTANTS = {
   // Hero section
   HERO_TITLE_LINE_1: "Find Your Next",
   HERO_TITLE_LINE_2: "Open House",
@@ -11,9 +11,7 @@ export const HOMEPAGE_CONSTANTS = {
   SEARCHING: "Searching...",
 
   // Search validation
-  SEARCH_ERROR_EMPTY: "Please enter an address, suburb or postcode.",
-  SEARCH_ERROR_TOO_SHORT: "Please enter at least 3 characters.",
-  SEARCH_ERROR_INVALID_CHARS: "Address contains invalid characters.",
+  SEARCH_ERROR_INVALID: "Please enter a valid address.",
   MIN_ADDRESS_LENGTH: 3,
   SEARCH_BUTTON_WIDTH_PX: 110,
 
@@ -54,7 +52,6 @@ export const HOMEPAGE_CONSTANTS = {
 
   // Search behavior
   MIN_LOADING_MS: 2000,
-
   SEARCH_DEBOUNCE_MS: 1000,
 
   // Map defaults

@@ -3,7 +3,6 @@ import SearchBar, { type SearchBarValues } from "@/components/search/searchBar"
 import SearchFilterBar, { type FilterValues } from "@/components/search/searchFilterBar"
 import MapPlaceholder from "@/components/search/mapPlaceholder"
 import { useSearchPropertiesMutation } from "@/store/propertiesApi"
-import { mockGeocode } from "@/utils/mockGeocode"
 import heroImage from "@/assets/hero.jpg"
 import { searchPageConstants as C } from "@/common/constants"
 
@@ -34,14 +33,12 @@ export default function SearchPage() {
     const startedAt = Date.now()
 
     try {
-      const { latitude, longitude } = await mockGeocode(barValues.address)
-
-      setMapCenter({ lat: latitude, lng: longitude })
+      setMapCenter({ lat: barValues.latitude, lng: barValues.longitude })
       setMapRadiusMeters(barValues.radiusMeters)
 
       await searchProperties({
-        latitude,
-        longitude,
+        latitude: barValues.latitude,
+        longitude: barValues.longitude,
         radiusMeters: barValues.radiusMeters,
         ...appliedFilters,
       }).unwrap()

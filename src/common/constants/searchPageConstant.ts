@@ -63,4 +63,10 @@ export const SEARCHPAGE_CONSTANTS = {
   MAP_COLOR_OPEN_HOUSE: "#ef4444",
   MAP_COLOR_NO_OPEN_HOUSE: "#3b82f6",
   MAP_COLOR_RADIUS_CIRCLE: "#3b82f6",
+
+  // Address autocomplete
+  AUTOCOMPLETE_COUNTRY_RESTRICTION: "au",
+
+  // Google Maps script libraries
+GOOGLE_MAPS_LIBRARIES: ["places"] as ("places")[],
 }

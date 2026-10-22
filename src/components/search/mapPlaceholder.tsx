@@ -24,6 +24,7 @@ export default function MapPlaceholder({
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY ?? "",
     id: "google-map-script",
+    libraries: C.GOOGLE_MAPS_LIBRARIES,
   })
 
   const canRenderRealMap = Boolean(GOOGLE_MAPS_API_KEY) && isLoaded && center

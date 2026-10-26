@@ -1,6 +1,4 @@
 import { useState, type FormEvent } from "react"
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -9,10 +7,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import AddressAutocomplete from "./addressAutocomplete"
+import { geocodeSelectedPlace, geocodeFreeTextAddress, type AddressSuggestion } from "@/services/addressService"
 import { searchPageConstants as C } from "@/common/constants"
 
 export interface SearchBarValues {
   address: string
+  latitude: number
+  longitude: number
   radiusMeters: number
   dateRange: string
 }
@@ -26,11 +28,21 @@ const ADDRESS_PATTERN = /^[a-zA-Z0-9\s,.'/-]*$/
 
 export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   const [address, setAddress] = useState("")
-  const [radiusMeters, setRadiusMeters] = useState(5000)
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
+  const [radiusMeters, setRadiusMeters] = useState(C.DEFAULT_RADIUS_METERS)
   const [dateRange, setDateRange] = useState("any")
   const [validationError, setValidationError] = useState("")
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleAddressChange = (value: string) => {
+    setAddress(value)
+    setSelectedPlaceId(null)
+  }
+
+  const handleSelectSuggestion = (suggestion: AddressSuggestion) => {
+    setSelectedPlaceId(suggestion.placeId)
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
     const trimmed = address.trim()
@@ -43,7 +55,12 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
     }
 
     setValidationError("")
-    onSearch({ address: trimmed, radiusMeters, dateRange })
+
+    const { latitude, longitude } = selectedPlaceId
+      ? await geocodeSelectedPlace(selectedPlaceId, trimmed)
+      : await geocodeFreeTextAddress(trimmed)
+
+    onSearch({ address: trimmed, latitude, longitude, radiusMeters, dateRange })
   }
 
   return (
@@ -52,15 +69,11 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         onSubmit={handleSubmit}
         className="flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-lg sm:flex-row sm:items-center"
       >
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <Input
-            placeholder={C.ADDRESS_PLACEHOLDER}
-            className="border-0 pl-9 shadow-none focus-visible:ring-0"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </div>
+        <AddressAutocomplete
+          value={address}
+          onChange={handleAddressChange}
+          onSelectSuggestion={handleSelectSuggestion}
+        />
 
         <Select value={String(radiusMeters)} onValueChange={(v) => setRadiusMeters(Number(v))}>
           <SelectTrigger className="w-full border-0 shadow-none sm:w-[140px]">

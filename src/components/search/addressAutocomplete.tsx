@@ -17,28 +17,21 @@ export default function AddressAutocomplete({
 }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
   const [isOpen, setIsOpen] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const isLongEnough = value.trim().length >= C.MIN_ADDRESS_LENGTH
+
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!isLongEnough) return
 
-    if (value.trim().length < C.MIN_ADDRESS_LENGTH) {
-      setSuggestions([])
-      setIsOpen(false)
-      return
-    }
-
-    debounceRef.current = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const results = await fetchAddressSuggestions(value)
       setSuggestions(results)
       setIsOpen(results.length > 0)
     }, C.SEARCH_DEBOUNCE_MS)
 
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [value])
+    return () => clearTimeout(timer)
+  }, [value, isLongEnough])
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -56,6 +49,8 @@ export default function AddressAutocomplete({
     onSelectSuggestion(suggestion)
   }
 
+  const showDropdown = isOpen && isLongEnough && suggestions.length > 0
+
   return (
     <div ref={containerRef} className="relative flex-1">
       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -67,7 +62,7 @@ export default function AddressAutocomplete({
         onFocus={() => suggestions.length > 0 && setIsOpen(true)}
       />
 
-      {isOpen && (
+      {showDropdown && (
         <ul className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
           {suggestions.map((suggestion) => (
             <li key={suggestion.placeId}>

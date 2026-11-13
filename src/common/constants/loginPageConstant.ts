@@ -16,4 +16,7 @@ export const LOGINPAGE_CONSTANTS = {
 
   // Storage keys
   USER_KEY: "user",
+
+  LOGIN_ROUTE: "/login",
+  POST_LOGIN_ROUTE: "/",
 }

@@ -7,9 +7,18 @@ export interface OpenHouseDTO {
   status: "SCHEDULED" | "CANCELLED" | "COMPLETED"
 }
 
-export interface PropertyDTO {
+export interface AgentDTO {
+  name: string
+  agencyName: string | null
+  phone: string | null
+  email: string | null
+  photoUrl: string | null
+}
+
+// Returned by search
+export interface PropertySummaryDTO {
   externalId: string
-  source: string
+  source: "domain" | "mock"
   address: string
   suburb: string
   state: string
@@ -18,12 +27,21 @@ export interface PropertyDTO {
   displayPrice: string
   bedrooms: number
   bathrooms: number
+  carSpaces: number | null
   propertyType: string
   latitude: number | null
   longitude: number | null
+  thumbnailUrl: string | null
+  openHouses: OpenHouseDTO[]
+}
+
+// Returned by the details endpoint
+export interface PropertyDetailDTO extends PropertySummaryDTO {
+  landSizeSqm: number | null
   description: string | null
   listingUrl: string | null
-  openHouses: OpenHouseDTO[]
+  images: string[]
+  agent: AgentDTO | null
 }
 
 export interface PropertySearchParams {
@@ -42,7 +60,7 @@ export interface PropertySearchParams {
   auctionOnly?: boolean
 }
 
-const baseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api")
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api"
 
 export const propertiesApi = createApi({
   reducerPath: "propertiesApi",
@@ -51,16 +69,20 @@ export const propertiesApi = createApi({
     credentials: "include",
   }),
   endpoints: (builder) => ({
-    searchProperties: builder.mutation<PropertyDTO[], PropertySearchParams>({
+    searchProperties: builder.mutation<PropertySummaryDTO[], PropertySearchParams>({
       query: (params) => ({
         url: "/properties/search",
         method: "POST",
         body: params,
       }),
-      transformResponse: (response: { properties: PropertyDTO[] }) => response.properties,
+      transformResponse: (response: { properties: PropertySummaryDTO[] }) => response.properties,
+    }),
 
+    getPropertyById: builder.query<PropertyDetailDTO, string>({
+      query: (externalId) => `/properties/${encodeURIComponent(externalId)}`,
+      transformResponse: (response: { property: PropertyDetailDTO }) => response.property,
     }),
   }),
 })
 
-export const { useSearchPropertiesMutation } = propertiesApi
+export const { useSearchPropertiesMutation, useGetPropertyByIdQuery } = propertiesApi

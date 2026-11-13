@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
 import { Home, Mail, Lock } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,6 +12,8 @@ import { getApiErrorMessage } from "@/api/errors"
 import { useAppDispatch } from "@/store/hooks"
 import { setUser } from "@/store/authSlice"
 import { useForm } from "react-hook-form"
+import { useNavigate, useLocation, Link } from "react-router-dom"
+import { getRedirectTarget } from "@/utils/authRedirect"
 
 interface LoginFormValues {
   email: string
@@ -21,6 +22,7 @@ interface LoginFormValues {
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useAppDispatch()
   const [error, setError] = useState("")
 
@@ -41,7 +43,7 @@ export default function LoginPage() {
 
       dispatch(setUser(user))
 
-      navigate("/")
+      navigate(getRedirectTarget(location.state), { replace: true })
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, loginPageConstants.LOGIN_FAILED))
     }

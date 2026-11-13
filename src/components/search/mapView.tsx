@@ -1,10 +1,12 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { GoogleMap, Marker, Circle, InfoWindow } from "@react-google-maps/api"
-import type { PropertyDTO } from "@/store/propertiesApi"
-import { searchPageConstants as C } from "@/common/constants"
+import type { PropertySummaryDTO } from "@/store/propertiesApi"
+import { formatOpenHouseDate, formatOpenHouseTime, getUpcomingOpenHouses } from "@/utils/formatOpenHouse"
+import { searchPageConstants as C, propertyDetailsConstants as D } from "@/common/constants"
 
 interface MapViewProps {
-  properties: PropertyDTO[]
+  properties: PropertySummaryDTO[]
   center: { lat: number; lng: number }
   radiusMeters: number
 }
@@ -18,12 +20,17 @@ const mapOptions: google.maps.MapOptions = {
 }
 
 export default function MapView({ properties, center, radiusMeters }: MapViewProps) {
-  const [selected, setSelected] = useState<PropertyDTO | null>(null)
+  const [selected, setSelected] = useState<PropertySummaryDTO | null>(null)
+  const [nowMs] = useState(() => Date.now())
 
   const propertiesWithCoords = properties.filter(
-    (p): p is PropertyDTO & { latitude: number; longitude: number } =>
+    (p): p is PropertySummaryDTO & { latitude: number; longitude: number } =>
       p.latitude !== null && p.longitude !== null,
   )
+
+  const nextOpenHouse = selected
+    ? getUpcomingOpenHouses(selected.openHouses, nowMs)[0]
+    : undefined
 
   return (
     <div className="h-full w-full">
@@ -70,17 +77,24 @@ export default function MapView({ properties, center, radiusMeters }: MapViewPro
             position={{ lat: selected.latitude, lng: selected.longitude }}
             onCloseClick={() => setSelected(null)}
           >
-            <div className="max-w-[200px] text-sm">
+            <div className="max-w-[220px] text-sm">
               <p className="font-semibold text-slate-900">{selected.address}</p>
               <p className="text-slate-600">{selected.displayPrice}</p>
               <p className="text-xs text-slate-500">
                 {selected.bedrooms} bed · {selected.bathrooms} bath · {selected.propertyType}
               </p>
-              {selected.openHouses.length > 0 && (
+              {nextOpenHouse && (
                 <p className="mt-1 text-xs font-medium text-red-600">
-                  Open house: {new Date(selected.openHouses[0].startDatetime).toLocaleString()}
+                  {D.NEXT_OPEN_HOUSE}: {formatOpenHouseDate(nextOpenHouse)} ·{" "}
+                  {formatOpenHouseTime(nextOpenHouse)}
                 </p>
               )}
+              <Link
+                to={D.PATH(selected.externalId)}
+                className="mt-2 inline-block text-xs font-medium text-blue-600 hover:underline"
+              >
+                {D.VIEW_DETAILS}
+              </Link>
             </div>
           </InfoWindow>
         )}

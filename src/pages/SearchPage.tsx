@@ -1,8 +1,11 @@
-import { useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import SearchBar, { type SearchBarValues } from "@/components/search/searchBar"
 import SearchFilterBar, { type FilterValues } from "@/components/search/searchFilterBar"
 import MapPlaceholder from "@/components/search/mapPlaceholder"
 import { useSearchPropertiesMutation } from "@/store/propertiesApi"
+import { geocodeFreeTextAddress } from "@/services/addressService"
+import { isValidAddress } from "@/utils/addressValidation"
 import heroImage from "@/assets/hero.jpg"
 import { searchPageConstants as C } from "@/common/constants"
 
@@ -13,6 +16,7 @@ interface MapCenter {
 
 export default function SearchPage() {
   const [searchProperties, { data: properties = [] }] = useSearchPropertiesMutation()
+  const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState<FilterValues>({})
   const [lastSearch, setLastSearch] = useState<SearchBarValues | null>(null)
   const [mapCenter, setMapCenter] = useState<MapCenter | null>(C.DEFAULT_MAP_CENTER)
@@ -20,6 +24,8 @@ export default function SearchPage() {
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState("")
   const lastSearchAtRef = useRef(0)
+
+  const urlAddress = searchParams.get(C.URL_ADDRESS_PARAM)
 
   const runSearch = async (barValues: SearchBarValues, appliedFilters: FilterValues) => {
     const now = Date.now()
@@ -62,6 +68,33 @@ export default function SearchPage() {
     setFilters(newFilters)
     if (lastSearch) runSearch(lastSearch, newFilters)
   }
+
+  // Latest-handler ref so the URL effect below depends only on the address
+  const handleSearchRef = useRef(handleSearch)
+  useEffect(() => {
+    handleSearchRef.current = handleSearch
+  })
+
+  // Search started from the navbar search box: /?address=...
+  useEffect(() => {
+    if (!urlAddress || !isValidAddress(urlAddress)) return
+
+    let cancelled = false
+    geocodeFreeTextAddress(urlAddress).then(({ latitude, longitude }) => {
+      if (cancelled) return
+      handleSearchRef.current({
+        address: urlAddress,
+        latitude,
+        longitude,
+        radiusMeters: C.DEFAULT_RADIUS_METERS,
+        dateRange: C.DEFAULT_DATE_RANGE,
+      })
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [urlAddress])
 
   return (
     <div className="relative">

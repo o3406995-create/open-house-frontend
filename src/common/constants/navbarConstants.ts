@@ -5,6 +5,8 @@ export const NAVBAR_CONSTANTS = {
   NAV_FIND_AGENTS: "Find Agents",
   NAV_MY_OPEN_HOUSES: "My Open Houses",
   NAV_SAVED_PROPERTIES: "Saved Properties",
+  NAV_SEARCH_PLACEHOLDER: "Search suburb, postcode...",
+  NAV_SEARCH_LABEL: "Search by suburb or postcode",
 
   LOGIN: "Log in",
   SIGN_UP: "Sign Up",

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, SlidersHorizontal, Check } from "lucide-react"
-import { homePageConstants as C } from "@/common/constants"
+import { searchPageConstants as C } from "@/common/constants"
 
 export interface FilterValues {
   minPrice?: number

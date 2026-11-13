@@ -1,7 +1,7 @@
 import { useJsApiLoader } from "@react-google-maps/api"
 import { Users } from "lucide-react"
 import type { PropertyDTO } from "@/store/propertiesApi"
-import { homePageConstants as C } from "@/common/constants"
+import { searchPageConstants as C } from "@/common/constants"
 import MapView from "./mapView"
 
 interface mapPlaceholderProps {
@@ -24,6 +24,7 @@ export default function MapPlaceholder({
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY ?? "",
     id: "google-map-script",
+    libraries: C.GOOGLE_MAPS_LIBRARIES,
   })
 
   const canRenderRealMap = Boolean(GOOGLE_MAPS_API_KEY) && isLoaded && center

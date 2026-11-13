@@ -38,9 +38,9 @@ export default function LoginPage() {
         email: data.email.trim(),
         password: data.password,
       })
- 
+
       dispatch(setUser(user))
- 
+
       navigate("/")
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, loginPageConstants.LOGIN_FAILED))
@@ -115,10 +115,13 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Error message */}
+        {/* Field-level validation errors (empty fields) */}
         {(errors.email || errors.password) && <p className="mt-3 text-sm text-red-600">
           {errors.email?.message ?? errors.password?.message}
           </p>}
+
+        {/* Server-side error (wrong credentials, account disabled, etc.) */}
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
         {/* Sign In button */}
         <div className="mt-6">

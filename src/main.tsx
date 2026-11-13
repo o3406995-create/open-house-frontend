@@ -5,12 +5,14 @@ import { Provider } from 'react-redux'
 import { store } from './store/store.ts'
 import './index.css'
 import App from './App.tsx'
-import Home from './pages/Home.tsx'
+import SearchPage from './pages/SearchPage.tsx'
 import ContactUs from './pages/ContactUs.tsx'
 import LoginPage from './pages/loginPage.tsx'
 import RegisterPage from './pages/registerPage.tsx'
+import FindAgents from './pages/FindAgents.tsx'
+import MyOpenHouses from './pages/MyOpenHouses.tsx'
+import SavedProperties from './pages/SavedProperties.tsx'
 import ProtectedRoute from './components/ProtectedRoute.tsx'
-
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -22,7 +24,31 @@ createRoot(document.getElementById('root')!).render(
               index
               element={
                 <ProtectedRoute>
-                  <Home />
+                  <SearchPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="agents"
+              element={
+                <ProtectedRoute>
+                  <FindAgents />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="my-open-houses"
+              element={
+                <ProtectedRoute>
+                  <MyOpenHouses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="saved-properties"
+              element={
+                <ProtectedRoute>
+                  <SavedProperties />
                 </ProtectedRoute>
               }
             />

@@ -1,12 +1,12 @@
-import { useEffect } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Home } from 'lucide-react'
 import { useGetCurrentUserQuery } from '@/store/authApi'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { setUser, clearUser } from '@/store/authSlice'
+import { clearUser } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
+import NavbarSearch from '@/components/navbarSearch'
 import { authApi } from '@/api/auth'
-import { navbarConstants as C } from '@/common/constants'
+import { navbarConstants as C, searchPageConstants as S } from '@/common/constants'
 import './App.css'
 
 const NAV_ITEMS = [
@@ -19,14 +19,11 @@ const NAV_ITEMS = [
 function App() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const user = useAppSelector((state) => state.auth.user)
-  const { data, isSuccess } = useGetCurrentUserQuery()
 
-  useEffect(() => {
-    if (isSuccess && data) {
-      dispatch(setUser(data.user))
-    }
-  }, [isSuccess, data, dispatch])
+  // Loads the current session; authSlice stores the user when this succeeds
+  useGetCurrentUserQuery()
 
   const handleLogout = async () => {
     try {
@@ -38,18 +35,21 @@ function App() {
     navigate('/')
   }
 
+  // The search page has its own search bar
+  const showNavbarSearch = Boolean(user) && location.pathname !== S.SEARCH_ROUTE
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-xl">
-        <div className="relative flex items-center justify-between px-6 py-2">
-          <Link to="/" className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-6 py-2 sm:grid sm:grid-cols-[1fr_auto_1fr]">
+          <Link to="/" className="flex items-center gap-2 justify-self-start">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white">
               <Home className="h-4 w-4" />
             </div>
             <span className="text-lg font-semibold">{C.BRAND_NAME}</span>
           </Link>
 
-          <nav className="absolute left-1/2 hidden w-[500px] max-w-[90vw] -translate-x-1/2 items-center justify-between sm:flex lg:w-[650px] xl:w-[800px]">
+          <nav className="hidden w-[500px] max-w-[90vw] items-center justify-between sm:flex lg:w-[650px] xl:w-[800px]">
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
@@ -66,7 +66,12 @@ function App() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 justify-self-end">
+            {showNavbarSearch && (
+              <div className="hidden lg:block">
+                <NavbarSearch />
+              </div>
+            )}
             {user ? (
               <>
                 <span className="text-sm font-medium text-slate-700">

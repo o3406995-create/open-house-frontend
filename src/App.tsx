@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { clearUser } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import NavbarSearch from '@/components/navbarSearch'
+import ContentLayout from '@/layouts/contentLayout'
 import { authApi } from '@/api/auth'
 import { navbarConstants as C, searchPageConstants as S } from '@/common/constants'
 import './App.css'
@@ -146,8 +147,10 @@ function App() {
         )}
       </header>
 
-      <main className="flex-1">
-        <Outlet />
+      <main className="flex flex-1 flex-col">
+        <ContentLayout>
+          <Outlet />
+        </ContentLayout>
       </main>
     </div>
   )

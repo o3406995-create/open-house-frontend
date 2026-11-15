@@ -13,5 +13,9 @@ export const NAVBAR_CONSTANTS = {
   LOGOUT: "Log out",
   GREETING: (name: string) => `Hi, ${name}`,
 
+  MENU_ID: "navbar-menu",
+  MENU_OPEN_LABEL: "Open menu",
+  MENU_CLOSE_LABEL: "Close menu",
+
   PAGE_COMING_SOON: "This page is coming soon.",
 }

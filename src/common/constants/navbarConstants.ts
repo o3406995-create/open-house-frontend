@@ -18,4 +18,7 @@ export const NAVBAR_CONSTANTS = {
   MENU_CLOSE_LABEL: "Close menu",
 
   PAGE_COMING_SOON: "This page is coming soon.",
+
+  MOBILE_MENU_ID: "mobile-menu",
+  MOBILE_NAV_LABEL: "Main navigation",
 }

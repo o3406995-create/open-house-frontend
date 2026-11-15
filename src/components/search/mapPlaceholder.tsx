@@ -1,11 +1,11 @@
 import { useJsApiLoader } from "@react-google-maps/api"
 import { Users } from "lucide-react"
-import type { PropertyDTO } from "@/store/propertiesApi"
+import type { PropertySummaryDTO } from "@/store/propertiesApi"
 import { searchPageConstants as C } from "@/common/constants"
 import MapView from "./mapView"
 
 interface mapPlaceholderProps {
-  properties: PropertyDTO[]
+  properties: PropertySummaryDTO[]
   center?: { lat: number; lng: number }
   radiusMeters?: number
 }

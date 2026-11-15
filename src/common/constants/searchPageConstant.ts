@@ -69,4 +69,10 @@ export const SEARCHPAGE_CONSTANTS = {
 
   // Google Maps script libraries
 GOOGLE_MAPS_LIBRARIES: ["places"] as ("places")[],
+
+  // Navigation and URL search
+  SEARCH_ROUTE: "/",
+  URL_ADDRESS_PARAM: "address",
+  DEFAULT_DATE_RANGE: "any",
+  ADDRESS_PATTERN: /^[a-zA-Z0-9\s,.'/-]*$/,
 }

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react"
+import { isValidAddress } from "@/utils/addressValidation"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -24,13 +25,11 @@ interface SearchBarProps {
   isLoading: boolean
 }
 
-const ADDRESS_PATTERN = /^[a-zA-Z0-9\s,.'/-]*$/
-
 export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   const [address, setAddress] = useState("")
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const [radiusMeters, setRadiusMeters] = useState(C.DEFAULT_RADIUS_METERS)
-  const [dateRange, setDateRange] = useState("any")
+  const [dateRange, setDateRange] = useState(C.DEFAULT_DATE_RANGE)
   const [validationError, setValidationError] = useState("")
 
   const handleAddressChange = (value: string) => {
@@ -46,10 +45,8 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
     e.preventDefault()
 
     const trimmed = address.trim()
-    const isValid =
-      trimmed.length >= C.MIN_ADDRESS_LENGTH && ADDRESS_PATTERN.test(trimmed)
 
-    if (!isValid) {
+    if (!isValidAddress(trimmed)) {
       setValidationError(C.SEARCH_ERROR_INVALID)
       return
     }
@@ -92,7 +89,7 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="any">{C.DATE_ANY}</SelectItem>
+            <SelectItem value={C.DEFAULT_DATE_RANGE}>{C.DATE_ANY}</SelectItem>
             <SelectItem value="today">{C.DATE_TODAY}</SelectItem>
             <SelectItem value="weekend">{C.DATE_WEEKEND}</SelectItem>
             <SelectItem value="week">{C.DATE_WEEK}</SelectItem>

@@ -12,6 +12,11 @@ interface mapPlaceholderProps {
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 
+// Local dev only: with no key, Google still serves a watermarked
+// "For development purposes only" map. Opt in from .env.
+const ALLOW_KEYLESS_DEV_MAP =
+  import.meta.env.DEV && import.meta.env.VITE_GOOGLE_MAPS_KEYLESS_DEV === "true"
+
 export default function MapPlaceholder({
   properties,
   center,
@@ -27,7 +32,8 @@ export default function MapPlaceholder({
     libraries: C.GOOGLE_MAPS_LIBRARIES,
   })
 
-  const canRenderRealMap = Boolean(GOOGLE_MAPS_API_KEY) && isLoaded && center
+  const canRenderRealMap =
+    (Boolean(GOOGLE_MAPS_API_KEY) || ALLOW_KEYLESS_DEV_MAP) && isLoaded && center
 
   return (
     <div className="relative h-full overflow-hidden bg-slate-100">

@@ -5,7 +5,11 @@ import { Input } from "@/components/ui/input"
 import { isValidAddress } from "@/utils/addressValidation"
 import { navbarConstants as N, searchPageConstants as S } from "@/common/constants"
 
-export default function NavbarSearch() {
+interface NavbarSearchProps {
+    inputClassName?: string
+}
+
+export default function NavbarSearch({ inputClassName = "w-44" }: NavbarSearchProps) {
   const navigate = useNavigate()
   const [value, setValue] = useState("")
   const [hasError, setHasError] = useState(false)
@@ -41,7 +45,7 @@ export default function NavbarSearch() {
         placeholder={N.NAV_SEARCH_PLACEHOLDER}
         aria-label={N.NAV_SEARCH_LABEL}
         aria-invalid={hasError}
-        className="w-44 pl-8"
+        className={`${inputClassName} pl-8`}
       />
       {hasError && (
         <p

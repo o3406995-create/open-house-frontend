@@ -97,12 +97,13 @@ export default function SearchPage() {
   }, [urlAddress])
 
   return (
-    <div className="relative">
+    <div className="relative flex flex-1 flex-col">
+      {/* Hero. On narrow screens it has extra bottom padding that the search card overlaps. */}
       <div
-        className="flex h-[240px] flex-col justify-start bg-cover bg-center px-6 pt-4"
+        className="relative shrink-0 bg-cover bg-center px-4 pb-20 pt-6 md:h-[240px] md:px-6 md:pb-0 md:pt-4"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 top-0 h-[240px] bg-slate-900/40" />
+        <div className="absolute inset-0 bg-slate-900/40" />
         <div className="relative mx-auto w-full max-w-5xl">
           <p className="text-3xl font-bold text-white sm:text-4xl">
             {C.HERO_TITLE_LINE_1}
@@ -113,15 +114,8 @@ export default function SearchPage() {
         </div>
       </div>
 
-      <div className="h-[calc(100vh-57px-240px)] min-h-[300px]">
-        <MapPlaceholder
-          properties={properties}
-          center={mapCenter ?? undefined}
-          radiusMeters={mapRadiusMeters}
-        />
-      </div>
-
-      <div className="absolute left-1/2 top-[180px] z-10 w-full max-w-5xl -translate-x-1/2 px-6">
+      {/* Search card: in the flow below the hero on narrow screens, overlaid from md up */}
+      <div className="relative z-10 mx-auto -mt-14 w-full max-w-5xl shrink-0 px-4 md:absolute md:left-1/2 md:top-[180px] md:mx-0 md:mt-0 md:-translate-x-1/2 md:px-6">
         <div className="rounded-2xl bg-white p-2 shadow-xl">
           <SearchBar onSearch={handleSearch} isLoading={isSearching} />
           <SearchFilterBar onChange={handleFilterChange} />
@@ -131,6 +125,17 @@ export default function SearchPage() {
             {searchError}
           </p>
         )}
+      </div>
+
+      {/* The map takes whatever height is left, with a minimum so it never collapses */}
+      <div className="relative min-h-[360px] flex-1">
+        <div className="absolute inset-0">
+          <MapPlaceholder
+            properties={properties}
+            center={mapCenter ?? undefined}
+            radiusMeters={mapRadiusMeters}
+          />
+        </div>
       </div>
     </div>
   )

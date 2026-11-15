@@ -19,7 +19,7 @@ export default function PropertyGallery({ images, address }: PropertyGalleryProp
   const showNext = () => setSelected((index) => (index + 1) % images.length)
 
   return (
-    <div>
+    <div className="min-w-0">
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-200">
         {current && !failedUrls.includes(current) ? (
           <img

@@ -24,7 +24,7 @@ function DetailsSkeleton() {
     <div
       role="status"
       aria-label={D.LOADING_LABEL}
-      className="grid animate-pulse gap-6 lg:grid-cols-3"
+      className="grid animate-pulse grid-cols-1 gap-6 lg:grid-cols-3"
     >
       <div className="aspect-[4/3] rounded-xl bg-slate-200" />
       <div className="space-y-4">
@@ -78,10 +78,10 @@ function PropertyDetailsContent({ property }: { property: PropertyDetailDTO }) {
 
   return (
     <>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.8fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.8fr)]">
         <PropertyGallery images={property.images} address={property.address} />
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <PropertySummary property={property} />
           <OpenHouseSchedule
             openHouses={upcoming}
@@ -90,7 +90,7 @@ function PropertyDetailsContent({ property }: { property: PropertyDetailDTO }) {
           />
         </div>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           {property.agent && <ListingAgentCard agent={property.agent} />}
           <PropertyActions listingUrl={property.listingUrl} canSave={role === D.ROLE_USER} />
         </div>
@@ -143,7 +143,7 @@ export default function PropertyDetailsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-6">
+    <div className="mx-auto w-full max-w-7xl py-4">
       <button
         type="button"
         onClick={goBack}

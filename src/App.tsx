@@ -18,28 +18,56 @@ const NAV_ITEMS = [
   { to: '/saved-properties', label: C.NAV_SAVED_PROPERTIES, end: false },
 ]
 
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `whitespace-nowrap text-sm font-medium transition ${
-    isActive ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900'
-  }`
+interface UserActionsProps {
+  userName: string | null
+  onLogout: () => void
+  onLogin: () => void
+  onSignUp: () => void
+}
+
+function UserActions({ userName, onLogout, onLogin, onSignUp }: UserActionsProps) {
+  if (userName) {
+    return (
+      <>
+        <span className="text-sm font-medium text-slate-700">{C.GREETING(userName)}</span>
+        <button
+          type="button"
+          onClick={onLogout}
+          className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+        >
+          {C.LOGOUT}
+        </button>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Button variant="outline" size="sm" onClick={onLogin}>
+        {C.LOGIN}
+      </Button>
+      <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={onSignUp}>
+        {C.SIGN_UP}
+      </Button>
+    </>
+  )
+}
 
 function App() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const location = useLocation()
   const user = useAppSelector((state) => state.auth.user)
-  // Below the md breakpoint the links and account actions live in a toggled menu
-  const [menuOpen, setMenuOpen] = useState(false)
 
   // Loads the current session; authSlice stores the user when this succeeds
   useGetCurrentUserQuery()
 
-  const closeMenu = () => setMenuOpen(false)
-
-  const goTo = (path: string) => {
-    closeMenu()
-    navigate(path)
-  }
+  // The mobile menu is open only for the location it was opened on, so navigating
+  // anywhere closes it without needing an effect.
+  const [openedAtKey, setOpenedAtKey] = useState<string | null>(null)
+  const menuOpen = openedAtKey === location.key
+  const closeMenu = () => setOpenedAtKey(null)
+  const toggleMenu = () => setOpenedAtKey(menuOpen ? null : location.key)
 
   const handleLogout = async () => {
     closeMenu()
@@ -52,52 +80,37 @@ function App() {
     navigate('/')
   }
 
-  // The search page has its own search bar
-  const showNavbarSearch = Boolean(user) && location.pathname !== S.SEARCH_ROUTE
-
-  // Rendered in the desktop bar and again inside the mobile menu
-  const accountActions = user ? (
-    <>
-      <span className="max-w-28 truncate text-sm font-medium text-slate-700">
-        {C.GREETING(user.name)}
-      </span>
-      <button
-        type="button"
-        onClick={handleLogout}
-        className="whitespace-nowrap text-sm font-medium text-slate-600 transition hover:text-slate-900"
-      >
-        {C.LOGOUT}
-      </button>
-    </>
-  ) : (
-    <>
-      <Button variant="outline" size="sm" onClick={() => goTo('/login')}>
-        {C.LOGIN}
-      </Button>
-      <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => goTo('/register')}>
-        {C.SIGN_UP}
-      </Button>
-    </>
-  )
+  // The search page has its own search bar and is designed edge to edge
+  const isSearchPage = location.pathname === S.SEARCH_ROUTE
+  const showNavbarSearch = Boolean(user) && !isSearchPage
+  const userName = user?.name ?? null
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between gap-4 px-6 py-2 md:grid md:grid-cols-[1fr_auto_1fr]">
-          <Link
-            to="/"
-            onClick={closeMenu}
-            className="flex shrink-0 items-center gap-2 justify-self-start"
-          >
+        <div className="flex items-center justify-between px-6 py-2 md:grid md:grid-cols-[1fr_auto_1fr]">
+          <Link to="/" className="flex items-center gap-2 justify-self-start">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white">
               <Home className="h-4 w-4" />
             </div>
-            <span className="whitespace-nowrap text-lg font-semibold">{C.BRAND_NAME}</span>
+            <span className="text-lg font-semibold">{C.BRAND_NAME}</span>
           </Link>
 
-          <nav className="hidden items-center gap-4 md:flex xl:gap-8">
+          <nav
+            aria-label={C.MOBILE_NAV_LABEL}
+            className="hidden items-center justify-between md:flex md:w-[360px] lg:w-[650px] xl:w-[800px]"
+          >
             {NAV_ITEMS.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end} className={navLinkClass}>
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `w-16 whitespace-normal break-words text-center text-sm font-medium leading-tight transition lg:w-24 xl:w-auto xl:whitespace-nowrap ${
+                    isActive ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900'
+                  }`
+                }
+              >
                 {item.label}
               </NavLink>
             ))}
@@ -105,50 +118,85 @@ function App() {
 
           <div className="hidden items-center gap-3 justify-self-end md:flex">
             {showNavbarSearch && (
-              // Only shown once the bar is wide enough to hold it without squeezing the links
-              <div className="hidden min-[1400px]:block">
+              <div className="hidden lg:block">
                 <NavbarSearch />
               </div>
             )}
-            {accountActions}
+            <UserActions
+              userName={userName}
+              onLogout={handleLogout}
+              onLogin={() => navigate('/login')}
+              onSignUp={() => navigate('/register')}
+            />
           </div>
 
           <button
             type="button"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={toggleMenu}
             aria-label={menuOpen ? C.MENU_CLOSE_LABEL : C.MENU_OPEN_LABEL}
             aria-expanded={menuOpen}
-            aria-controls={C.MENU_ID}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 md:hidden"
+            aria-controls={C.MOBILE_MENU_ID}
+            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden"
           >
-            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {menuOpen ? (
+              <X className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            )}
           </button>
         </div>
 
         {menuOpen && (
-          <div id={C.MENU_ID} className="border-t border-slate-200 px-6 py-2 md:hidden">
-            <nav className="flex flex-col">
-              {NAV_ITEMS.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  onClick={closeMenu}
-                  className={(state) => `py-2 ${navLinkClass(state)}`}
-                >
-                  {item.label}
-                </NavLink>
-              ))}
+          <div id={C.MOBILE_MENU_ID} className="border-t border-slate-200 px-6 py-3 md:hidden">
+            <nav aria-label={C.MOBILE_NAV_LABEL}>
+              <ul className="space-y-1">
+                {NAV_ITEMS.map((item) => (
+                  <li key={item.to}>
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      onClick={closeMenu}
+                      className={({ isActive }) =>
+                        `block rounded-lg px-3 py-2 text-sm font-medium ${
+                          isActive
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
             </nav>
-            <div className="mt-2 flex items-center justify-between gap-3 border-t border-slate-200 py-2">
-              {accountActions}
+
+            {showNavbarSearch && (
+              <div className="mt-3">
+                <NavbarSearch inputClassName="w-full" />
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center gap-3 border-t border-slate-100 pt-3">
+              <UserActions
+                userName={userName}
+                onLogout={handleLogout}
+                onLogin={() => {
+                  closeMenu()
+                  navigate('/login')
+                }}
+                onSignUp={() => {
+                  closeMenu()
+                  navigate('/register')
+                }}
+              />
             </div>
           </div>
         )}
       </header>
 
       <main className="flex flex-1 flex-col">
-        <ContentLayout>
+        <ContentLayout fullBleed={isSearchPage}>
           <Outlet />
         </ContentLayout>
       </main>

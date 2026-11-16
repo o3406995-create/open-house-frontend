@@ -3,3 +3,4 @@ export { REGISTERPAGE_CONSTANTS as registerPageConstants } from './registerPageC
 export { SEARCHPAGE_CONSTANTS as searchPageConstants } from './searchPageConstant';
 export { NAVBAR_CONSTANTS as navbarConstants } from './navbarConstants';
 export { PROPERTYDETAILS_CONSTANTS as propertyDetailsConstants } from './propertyDetailsConstant';
+export { API_CONSTANTS as apiConstants } from './apiConstant';

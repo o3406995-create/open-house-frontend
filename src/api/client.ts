@@ -1,7 +1,7 @@
 import { loginPageConstants } from "@/common/constants"
+import { API_BASE_URL } from "@/config/apiBaseUrl"
 
-const baseURL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "")
-
+const baseURL = API_BASE_URL
 export class ApiError extends Error {
   status: number
   data: unknown

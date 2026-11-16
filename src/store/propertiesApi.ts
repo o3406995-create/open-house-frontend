@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/config/apiBaseUrl"
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
 export interface OpenHouseDTO {
@@ -60,7 +61,7 @@ export interface PropertySearchParams {
   auctionOnly?: boolean
 }
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api"
+const baseUrl = API_BASE_URL
 
 export const propertiesApi = createApi({
   reducerPath: "propertiesApi",

@@ -27,3 +27,5 @@ dist-ssr
 .env
 src/.env
 env/local.env
+
+coverage/

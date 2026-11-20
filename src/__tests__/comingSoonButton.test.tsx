@@ -28,9 +28,19 @@ describe("ComingSoonButton", () => {
     expect(screen.getByTestId("icon")).toBeInTheDocument()
   })
 
-  it("renders without an icon", () => {
+  it("renders no icon when none is given", () => {
+    render(<ComingSoonButton label="Save Property" />)
+
+    expect(screen.getByRole("button").querySelector("svg")).toBeNull()
+  })
+
+  it("is disabled in the primary style too", () => {
     render(<ComingSoonButton label="Add this Open House" primary />)
 
-    expect(screen.getByRole("button")).toHaveTextContent("Add this Open House")
+    const button = screen.getByRole("button")
+
+    expect(button).toBeDisabled()
+    expect(button).toHaveTextContent("Add this Open House")
+    expect(button).toHaveTextContent(D.COMING_SOON)
   })
 })

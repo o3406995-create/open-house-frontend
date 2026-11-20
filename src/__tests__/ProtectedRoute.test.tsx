@@ -44,9 +44,14 @@ function renderAt(path: string) {
 
 const finished = { isLoading: false, isUninitialized: false }
 
+const givenUser = (user: unknown) =>
+  mockUseAppSelector.mockImplementation((selector) =>
+    (selector as (state: unknown) => unknown)({ auth: { user } }),
+  )
+
 describe("ProtectedRoute", () => {
   it("shows a loading message while the current user is being fetched", () => {
-    mockUseAppSelector.mockReturnValue(null)
+    givenUser(null)
     mockUseGetCurrentUserQuery.mockReturnValue({ isLoading: true, isUninitialized: false })
 
     renderAt("/properties/mock-1")
@@ -56,7 +61,7 @@ describe("ProtectedRoute", () => {
   })
 
   it("also waits before the query has started", () => {
-    mockUseAppSelector.mockReturnValue(null)
+    givenUser(null)
     mockUseGetCurrentUserQuery.mockReturnValue({ isLoading: false, isUninitialized: true })
 
     renderAt("/properties/mock-1")
@@ -66,7 +71,7 @@ describe("ProtectedRoute", () => {
   })
 
   it("sends a visitor without a user to login and remembers where they came from", () => {
-    mockUseAppSelector.mockReturnValue(null)
+    givenUser(null)
     mockUseGetCurrentUserQuery.mockReturnValue(finished)
 
     renderAt("/properties/mock-1?tab=2")
@@ -76,7 +81,7 @@ describe("ProtectedRoute", () => {
   })
 
   it("shows the page to a logged in user", () => {
-    mockUseAppSelector.mockReturnValue({ user_id: 1 })
+    givenUser({ user_id: 1 })
     mockUseGetCurrentUserQuery.mockReturnValue(finished)
 
     renderAt("/properties/mock-1")

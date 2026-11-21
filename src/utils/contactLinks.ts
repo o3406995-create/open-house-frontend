@@ -11,5 +11,7 @@ export function toTelHref(phone: string | null): string | null {
   if (!phone) return null
   const trimmed = phone.trim()
   if (!D.PHONE_PATTERN.test(trimmed)) return null
-  return `tel:${trimmed.replace(D.PHONE_STRIP_PATTERN, "")}`
+  const number = trimmed.replace(D.PHONE_STRIP_PATTERN, "")
+  // The pattern also admits strings made only of "+", brackets and hyphens
+  return D.PHONE_DIGIT_PATTERN.test(number) ? `tel:${number}` : null
 }

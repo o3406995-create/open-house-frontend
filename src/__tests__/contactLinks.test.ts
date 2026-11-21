@@ -61,4 +61,7 @@ describe("toTelHref", () => {
       expect(toTelHref(phone)).toBeNull()
     },
   )
+    it.each(["------", "((((((", "++++++"])("returns null for %s, which has no digits", (phone) => {
+    expect(toTelHref(phone)).toBeNull()
+  })
 })

@@ -37,6 +37,10 @@ export const SAVEDPROPERTIES_CONSTANTS = {
   NO_LONGER_LISTED: "No longer listed",
   MAY_BE_OUT_OF_DATE: "Details may be out of date",
 
+  // Values of listingStatus returned by the backend
+  LISTING_STATUS_REMOVED: "REMOVED",
+  LISTING_STATUS_UNKNOWN: "UNKNOWN",
+
   BEDROOMS: "bedrooms",
   BATHROOMS: "bathrooms",
   CAR_SPACES: "car spaces",

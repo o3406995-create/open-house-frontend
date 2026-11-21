@@ -33,7 +33,7 @@ function Stat({ icon, value, label }: { icon: ReactNode; value: number; label: s
 
 export default function SavedPropertyRow({ item, nowMs, removing, onRemove }: SavedPropertyRowProps) {
   const { property, listingStatus } = item
-  const removed = listingStatus === "REMOVED"
+  const removed = listingStatus === C.LISTING_STATUS_REMOVED
 
   // A removed listing has no live open houses; for the others only upcoming, scheduled ones count
   const upcoming = removed
@@ -97,7 +97,7 @@ export default function SavedPropertyRow({ item, nowMs, removing, onRemove }: Sa
           <p className="truncate text-sm text-slate-500">
             {property.suburb} {property.state} {property.postcode}
           </p>
-          {listingStatus === "UNKNOWN" && (
+          {listingStatus === C.LISTING_STATUS_UNKNOWN && (
             <p className="text-xs text-amber-600">{C.MAY_BE_OUT_OF_DATE}</p>
           )}
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
@@ -127,9 +127,13 @@ export default function SavedPropertyRow({ item, nowMs, removing, onRemove }: Sa
 
       <div className="flex items-center gap-2 sm:justify-end">
         {removed ? (
-          <span aria-disabled="true" className={`${DETAILS_CLASS} cursor-not-allowed opacity-50`}>
+          <button
+            type="button"
+            disabled
+            className={`${DETAILS_CLASS} cursor-not-allowed opacity-50`}
+          >
             {C.VIEW_DETAILS}
-          </span>
+          </button>
         ) : (
           <Link
             to={C.PROPERTY_ROUTE(property.externalId)}

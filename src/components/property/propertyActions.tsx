@@ -1,22 +1,19 @@
-import { Bookmark, ExternalLink } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 import ComingSoonButton from "./comingSoonButton"
+import SavePropertyButton from "./savePropertyButton"
 import { propertyDetailsConstants as D } from "@/common/constants"
 
 interface PropertyActionsProps {
+  externalId: string
   listingUrl: string | null
   canSave: boolean
 }
 
-export default function PropertyActions({ listingUrl, canSave }: PropertyActionsProps) {
+export default function PropertyActions({ externalId, listingUrl, canSave }: PropertyActionsProps) {
   return (
     <div className="space-y-3">
       {canSave && <ComingSoonButton primary label={D.ADD_OPEN_HOUSE} />}
-      {canSave && (
-        <ComingSoonButton
-          label={D.SAVE_PROPERTY}
-          icon={<Bookmark className="h-4 w-4" aria-hidden="true" />}
-        />
-      )}
+      {canSave && <SavePropertyButton externalId={externalId} />}
       {listingUrl && (
         <a
           href={listingUrl}

@@ -4,6 +4,7 @@ import { Home, Menu, X } from 'lucide-react'
 import { useGetCurrentUserQuery } from '@/store/authApi'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { clearUser } from '@/store/authSlice'
+import { propertiesApi } from '@/store/propertiesApi'
 import { Button } from '@/components/ui/button'
 import NavbarSearch from '@/components/navbarSearch'
 import ContentLayout from '@/layouts/contentLayout'
@@ -77,6 +78,8 @@ function App() {
       // Even if the backend call fails, still clear local state so the user can log out
     }
     dispatch(clearUser())
+    // Cached per-user data must not outlive the session
+    dispatch(propertiesApi.util.resetApiState())
     navigate('/')
   }
 

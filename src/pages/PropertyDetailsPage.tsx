@@ -92,7 +92,11 @@ function PropertyDetailsContent({ property }: { property: PropertyDetailDTO }) {
 
         <div className="min-w-0 space-y-4">
           {property.agent && <ListingAgentCard agent={property.agent} />}
-          <PropertyActions listingUrl={property.listingUrl} canSave={role === D.ROLE_USER} />
+          <PropertyActions
+            externalId={property.externalId}
+            listingUrl={property.listingUrl}
+            canSave={role === D.ROLE_USER}
+          />
         </div>
       </div>
 

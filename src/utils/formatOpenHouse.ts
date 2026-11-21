@@ -33,3 +33,8 @@ export function getUpcomingOpenHouses(openHouses: OpenHouseDTO[], nowMs: number)
       (a, b) => new Date(a.startDatetime).getTime() - new Date(b.startDatetime).getTime(),
     )
 }
+
+// True when the open house starts on the same calendar day as nowMs, in the browser's time zone
+export function isOpenHouseToday(openHouse: OpenHouseDTO, nowMs: number): boolean {
+  return new Date(openHouse.startDatetime).toDateString() === new Date(nowMs).toDateString()
+}

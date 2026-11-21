@@ -60,4 +60,5 @@ export const PROPERTYDETAILS_CONSTANTS = {
   EMAIL_PATTERN: /^[^\s@?&#<>]+@[^\s@?&#<>]+\.[^\s@?&#<>]+$/,
   PHONE_PATTERN: /^[0-9+()\-\s]{6,20}$/,
   PHONE_STRIP_PATTERN: /[^\d+]/g,
+  PHONE_DIGIT_PATTERN: /\d/,
 }

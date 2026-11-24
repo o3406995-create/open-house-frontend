@@ -93,4 +93,18 @@ export const MYOPENHOUSES_CONSTANTS = {
   ADD_ERROR: "Could not add this open house. Please try again.",
   ADD_UNAVAILABLE_ERROR: "This open house is no longer available.",
   ADD_NOT_FOUND_ERROR: "We could not find this open house. Please reload the page.",
+
+  // The map view
+  MAP_LABEL: "Map of your open houses",
+  MAP_PADDING: 48,
+  MAP_ACTIVE_GROUPS: ["today", "upcoming"] as const,
+  MAP_LEGEND_ACTIVE: "Today or upcoming",
+  MAP_LEGEND_DONE: "Attended or expired",
+  MAP_LOADING: "Loading the map...",
+  MAP_UNAVAILABLE_TITLE: "The map is not available right now",
+  MAP_UNAVAILABLE_BODY: "You can still see your open houses in the list view.",
+  MAP_NO_LOCATION_TITLE: "These open houses have no location",
+  MAP_NO_LOCATION_BODY: "They cannot be shown on the map. Switch to the list view to see them.",
+  MAP_NO_LOCATION_NOTE: (count: number) =>
+    `${count} ${count === 1 ? "open house has" : "open houses have"} no location and ${count === 1 ? "is" : "are"} not on the map`,
 }

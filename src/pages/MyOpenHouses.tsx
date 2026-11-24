@@ -4,6 +4,7 @@ import { List, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import MessageCard from "@/components/messageCard"
 import MyOpenHouseRow from "@/components/myOpenHouses/myOpenHouseRow"
+import MyOpenHousesMap from "@/components/myOpenHouses/myOpenHousesMap"
 import {
   useGetMyOpenHousesQuery,
   useMarkMyOpenHouseAttendedMutation,
@@ -16,17 +17,25 @@ import {
   isNotFoundError,
   isNotStartedError,
   parseTab,
+  parseView,
   pickDefaultTab,
+  type MyOpenHousesView,
 } from "@/utils/myOpenHouses"
 import {
   loginPageConstants as L,
   myOpenHousesConstants as C,
-  propertyDetailsConstants as D,
   searchPageConstants as S,
 } from "@/common/constants"
 
 const PRIMARY_LINK_CLASS =
   "inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+
+const VIEW_LABEL: Record<MyOpenHousesView, string> = {
+  list: C.LIST_VIEW,
+  map: C.MAP_VIEW,
+}
+
+const VIEW_ICON = { list: List, map: MapPin }
 
 interface Busy {
   id: number
@@ -71,10 +80,17 @@ export default function MyOpenHouses() {
   const activeTab: MyOpenHouseGroup =
     parseTab(searchParams.get(C.TAB_PARAM)) ??
     (data ? pickDefaultTab(data.counts) : C.DEFAULT_TAB)
+  const view = parseView(searchParams.get(C.VIEW_PARAM))
 
   const selectTab = (tab: MyOpenHouseGroup) => {
     const next = new URLSearchParams(searchParams)
     next.set(C.TAB_PARAM, tab)
+    setSearchParams(next, { replace: true })
+  }
+
+  const selectView = (nextView: MyOpenHousesView) => {
+    const next = new URLSearchParams(searchParams)
+    next.set(C.VIEW_PARAM, nextView)
     setSearchParams(next, { replace: true })
   }
 
@@ -116,6 +132,49 @@ export default function MyOpenHouses() {
     const items = data.myOpenHouses[activeTab]
     const offersSearch = C.EMPTY_ACTION_GROUPS.some((group) => group === activeTab)
 
+    let panel: ReactNode
+    if (items.length === 0) {
+      panel = (
+        <MessageCard title={C.EMPTY_TITLES[activeTab]} body={C.EMPTY_BODIES[activeTab]}>
+          {offersSearch && (
+            <Link to={S.SEARCH_ROUTE} className={PRIMARY_LINK_CLASS}>
+              {C.EMPTY_ACTION}
+            </Link>
+          )}
+        </MessageCard>
+      )
+    } else if (view === "map") {
+      // Only rendered in the map view, so the map script is only loaded then. The key gives
+      // each tab its own map.
+      panel = <MyOpenHousesMap key={activeTab} items={items} />
+    } else {
+      panel = (
+        <ul
+          aria-label={C.LIST_LABEL}
+          aria-busy={isFetching}
+          className={`divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white ${
+            isFetching ? "opacity-60" : ""
+          }`}
+        >
+          {items.map((item) => (
+            <MyOpenHouseRow
+              key={item.myOpenHouseId}
+              item={item}
+              nowMs={nowMs}
+              removing={busy?.id === item.myOpenHouseId && busy.action === "remove"}
+              marking={busy?.id === item.myOpenHouseId && busy.action === "mark"}
+              onRemove={(id) => {
+                void handleRemove(id)
+              }}
+              onMarkAttended={(id) => {
+                void handleMarkAttended(id)
+              }}
+            />
+          ))}
+        </ul>
+      )
+    }
+
     body = (
       <>
         <div
@@ -153,39 +212,7 @@ export default function MyOpenHouses() {
           aria-labelledby={C.TAB_ID(activeTab)}
           className="mt-4"
         >
-          {items.length === 0 ? (
-            <MessageCard title={C.EMPTY_TITLES[activeTab]} body={C.EMPTY_BODIES[activeTab]}>
-              {offersSearch && (
-                <Link to={S.SEARCH_ROUTE} className={PRIMARY_LINK_CLASS}>
-                  {C.EMPTY_ACTION}
-                </Link>
-              )}
-            </MessageCard>
-          ) : (
-            <ul
-              aria-label={C.LIST_LABEL}
-              aria-busy={isFetching}
-              className={`divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white ${
-                isFetching ? "opacity-60" : ""
-              }`}
-            >
-              {items.map((item) => (
-                <MyOpenHouseRow
-                  key={item.myOpenHouseId}
-                  item={item}
-                  nowMs={nowMs}
-                  removing={busy?.id === item.myOpenHouseId && busy.action === "remove"}
-                  marking={busy?.id === item.myOpenHouseId && busy.action === "mark"}
-                  onRemove={(id) => {
-                    void handleRemove(id)
-                  }}
-                  onMarkAttended={(id) => {
-                    void handleMarkAttended(id)
-                  }}
-                />
-              ))}
-            </ul>
-          )}
+          {panel}
         </div>
       </>
     )
@@ -229,27 +256,25 @@ export default function MyOpenHouses() {
         </div>
 
         <div role="group" aria-label={C.VIEW_TOGGLE_LABEL} className="flex gap-2">
-          <Button
-            type="button"
-            size="sm"
-            aria-pressed={true}
-            className="gap-2 bg-blue-600 hover:bg-blue-700"
-          >
-            <List className="h-4 w-4" aria-hidden="true" />
-            {C.LIST_VIEW}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled
-            title={D.COMING_SOON}
-            aria-pressed={false}
-            className="gap-2"
-          >
-            <MapPin className="h-4 w-4" aria-hidden="true" />
-            {C.MAP_VIEW}
-          </Button>
+          {C.VIEWS.map((option) => {
+            const selected = option === view
+            const Icon = VIEW_ICON[option]
+
+            return (
+              <Button
+                key={option}
+                type="button"
+                size="sm"
+                variant={selected ? "default" : "outline"}
+                aria-pressed={selected}
+                onClick={() => selectView(option)}
+                className={`gap-2 ${selected ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                {VIEW_LABEL[option]}
+              </Button>
+            )
+          })}
         </div>
       </div>
 

@@ -257,12 +257,12 @@ describe("MyOpenHouses page: tabs", () => {
     expect(screen.queryByRole("link", { name: C.EMPTY_ACTION })).not.toBeInTheDocument()
   })
 
-  it("shows the list view, and the map view is not available yet", () => {
+  it("opens in the list view with both views available", () => {
     givenList(data)
     renderPage()
 
     expect(screen.getByRole("button", { name: C.LIST_VIEW })).toHaveAttribute("aria-pressed", "true")
-    expect(screen.getByRole("button", { name: C.MAP_VIEW })).toBeDisabled()
+    expect(screen.getByRole("button", { name: C.MAP_VIEW })).toBeEnabled()
   })
 })
 

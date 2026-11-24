@@ -5,3 +5,4 @@ export { NAVBAR_CONSTANTS as navbarConstants } from './navbarConstants';
 export { PROPERTYDETAILS_CONSTANTS as propertyDetailsConstants } from './propertyDetailsConstant';
 export { API_CONSTANTS as apiConstants } from './apiConstant';
 export { SAVEDPROPERTIES_CONSTANTS as savedPropertiesConstants } from './savedPropertiesConstant';
+export { MYOPENHOUSES_CONSTANTS as myOpenHousesConstants } from './myOpenHousesConstant';

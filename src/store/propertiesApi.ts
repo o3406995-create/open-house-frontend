@@ -1,5 +1,7 @@
 import { API_BASE_URL } from "@/config/apiBaseUrl"
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { myOpenHousesConstants as M } from "@/common/constants"
+import { tagsToInvalidate } from "@/utils/myOpenHouses"
 
 export interface OpenHouseDTO {
   externalId: string
@@ -92,6 +94,45 @@ export interface SavedPropertyResultDTO {
   property: PropertySummaryDTO
 }
 
+// The four groups of My Open Houses. The backend works them out when the list is read.
+export type MyOpenHouseGroup = "today" | "upcoming" | "attended" | "expired"
+
+export type MyOpenHouseCountsDTO = Record<MyOpenHouseGroup, number>
+
+// An entry as the list endpoint returns it. The property is the snapshot stored when the
+// open house was added, so it has no thumbnail and no open houses of its own.
+export interface MyOpenHouseItemDTO {
+  myOpenHouseId: number
+  addedAt: string
+  attended: boolean
+  group: MyOpenHouseGroup
+  openHouse: OpenHouseDTO
+  property: PropertySummaryDTO
+}
+
+export interface MyOpenHousesDTO {
+  timeZone: string
+  counts: MyOpenHouseCountsDTO
+  myOpenHouses: Record<MyOpenHouseGroup, MyOpenHouseItemDTO[]>
+}
+
+export type UserOpenHouseStatus = "UPCOMING" | "ATTENDED" | "EXPIRED"
+
+// What adding returns. It has a status instead of a group; adding the same open house again
+// returns the existing entry.
+export interface AddedMyOpenHouseDTO {
+  myOpenHouseId: number
+  addedAt: string
+  status: UserOpenHouseStatus
+  openHouse: OpenHouseDTO
+  property: PropertySummaryDTO
+}
+
+export interface AddMyOpenHouseParams {
+  propertyExternalId: string
+  openHouseExternalId: string
+}
+
 const baseUrl = API_BASE_URL
 
 const SAVED_PROPERTIES_TAG = "SavedProperties"
@@ -102,7 +143,7 @@ export const propertiesApi = createApi({
     baseUrl,
     credentials: "include",
   }),
-  tagTypes: [SAVED_PROPERTIES_TAG],
+  tagTypes: [SAVED_PROPERTIES_TAG, M.API_TAG],
   endpoints: (builder) => ({
     searchProperties: builder.mutation<PropertySummaryDTO[], PropertySearchParams>({
       query: (params) => ({
@@ -144,6 +185,46 @@ export const propertiesApi = createApi({
       }),
       invalidatesTags: [SAVED_PROPERTIES_TAG],
     }),
+
+    // The argument is the time zone of the browser. params encodes it (a "/" becomes %2F).
+    getMyOpenHouses: builder.query<MyOpenHousesDTO, string>({
+      query: (timeZone) => ({
+        url: "/my-open-houses",
+        params: { timeZone },
+      }),
+      providesTags: [M.API_TAG],
+    }),
+
+    addMyOpenHouse: builder.mutation<AddedMyOpenHouseDTO, AddMyOpenHouseParams>({
+      query: (body) => ({
+        url: "/my-open-houses",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: { myOpenHouse: AddedMyOpenHouseDTO }) =>
+        response.myOpenHouse,
+      invalidatesTags: [M.API_TAG],
+    }),
+
+    // A 404 means the entry is gone already, so the list is refreshed then as well
+    removeMyOpenHouse: builder.mutation<void, number>({
+      query: (myOpenHouseId) => ({
+        url: `/my-open-houses/${myOpenHouseId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, error) => tagsToInvalidate(error),
+    }),
+
+    // A 409 (not started yet) changes nothing; a 404 means the entry is gone
+    markMyOpenHouseAttended: builder.mutation<MyOpenHouseItemDTO, number>({
+      query: (myOpenHouseId) => ({
+        url: `/my-open-houses/${myOpenHouseId}/attended`,
+        method: "PATCH",
+      }),
+      transformResponse: (response: { myOpenHouse: MyOpenHouseItemDTO }) =>
+        response.myOpenHouse,
+      invalidatesTags: (_result, error) => tagsToInvalidate(error),
+    }),
   }),
 })
 
@@ -153,4 +234,8 @@ export const {
   useGetSavedPropertiesQuery,
   useSavePropertyMutation,
   useRemoveSavedPropertyMutation,
+  useGetMyOpenHousesQuery,
+  useAddMyOpenHouseMutation,
+  useRemoveMyOpenHouseMutation,
+  useMarkMyOpenHouseAttendedMutation,
 } = propertiesApi

@@ -1,5 +1,5 @@
 import { ExternalLink } from "lucide-react"
-import ComingSoonButton from "./comingSoonButton"
+import AddOpenHouseButton from "./addOpenHouseButton"
 import SavePropertyButton from "./savePropertyButton"
 import { propertyDetailsConstants as D } from "@/common/constants"
 
@@ -7,12 +7,25 @@ interface PropertyActionsProps {
   externalId: string
   listingUrl: string | null
   canSave: boolean
+  // The open house chosen in the schedule; null when there is none to choose
+  openHouseExternalId: string | null
 }
 
-export default function PropertyActions({ externalId, listingUrl, canSave }: PropertyActionsProps) {
+export default function PropertyActions({
+  externalId,
+  listingUrl,
+  canSave,
+  openHouseExternalId,
+}: PropertyActionsProps) {
   return (
     <div className="space-y-3">
-      {canSave && <ComingSoonButton primary label={D.ADD_OPEN_HOUSE} />}
+      {canSave && (
+        <AddOpenHouseButton
+          key={openHouseExternalId ?? "none"}
+          propertyExternalId={externalId}
+          openHouseExternalId={openHouseExternalId}
+        />
+      )}
       {canSave && <SavePropertyButton externalId={externalId} />}
       {listingUrl && (
         <a

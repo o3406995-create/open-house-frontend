@@ -21,6 +21,8 @@ export const MYOPENHOUSES_CONSTANTS = {
   STATUS_FORBIDDEN: 403,
   STATUS_NOT_FOUND: 404,
   STATUS_NOT_STARTED: 409,
+  // Adding an open house that has been cancelled or has finished
+  STATUS_UNAVAILABLE: 409,
 
   PAGE_TITLE: "My Open Houses",
   PAGE_SUBTITLE: "Manage your upcoming, attended and past open houses.",
@@ -83,4 +85,12 @@ export const MYOPENHOUSES_CONSTANTS = {
   BEDROOMS: "bedrooms",
   BATHROOMS: "bathrooms",
   CAR_SPACES: "car spaces",
+
+  // The button on the details page
+  ADDED: "Added to My Open Houses",
+  ADDED_HINT: "Remove from My Open Houses",
+  NO_OPEN_HOUSE_HINT: "There is no upcoming open house to add.",
+  ADD_ERROR: "Could not add this open house. Please try again.",
+  ADD_UNAVAILABLE_ERROR: "This open house is no longer available.",
+  ADD_NOT_FOUND_ERROR: "We could not find this open house. Please reload the page.",
 }

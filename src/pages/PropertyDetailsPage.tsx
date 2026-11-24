@@ -96,6 +96,7 @@ function PropertyDetailsContent({ property }: { property: PropertyDetailDTO }) {
             externalId={property.externalId}
             listingUrl={property.listingUrl}
             canSave={role === D.ROLE_USER}
+            openHouseExternalId={effectiveSelectedId}
           />
         </div>
       </div>

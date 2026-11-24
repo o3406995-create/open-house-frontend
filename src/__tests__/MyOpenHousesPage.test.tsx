@@ -1,5 +1,5 @@
 import { describe, it, expect, jest } from "@jest/globals"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import MyOpenHouses from "@/pages/MyOpenHouses"
@@ -379,5 +379,29 @@ describe("MyOpenHouses page: confirming attendance", () => {
     await user.click(markButton(1))
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+  })
+})
+
+describe("MyOpenHouses page: several requests at once", () => {
+  it("keeps a row disabled while its own request is on its way, even after another one finished", async () => {
+    const user = userEvent.setup()
+    givenList(listOf({ today: [entry(1, "today", 2), entry(2, "today", 2)] }))
+    let finishFirst: () => void = () => {}
+    mockRemove
+      .mockReturnValueOnce({
+        unwrap: () =>
+          new Promise<void>((resolve) => {
+            finishFirst = resolve
+          }),
+      })
+      .mockReturnValueOnce({ unwrap: () => new Promise<void>(() => {}) })
+    renderPage()
+
+    await user.click(removeButton(1))
+    await user.click(removeButton(2))
+    finishFirst()
+
+    await waitFor(() => expect(removeButton(1)).toBeEnabled())
+    expect(removeButton(2)).toBeDisabled()
   })
 })

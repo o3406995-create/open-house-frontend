@@ -66,7 +66,8 @@ export default function MyOpenHouses() {
   const [timeZone] = useState(getBrowserTimeZone)
   const [nowMs] = useState(() => Date.now())
   const [searchParams, setSearchParams] = useSearchParams()
-  const [busy, setBusy] = useState<Busy | null>(null)
+  // Several rows can be waiting at once, so every request in flight is kept
+  const [busy, setBusy] = useState<Busy[]>([])
   const [actionError, setActionError] = useState<string | null>(null)
 
   // Which group an open house is in depends on the time, so it is asked again every time the
@@ -94,9 +95,16 @@ export default function MyOpenHouses() {
     setSearchParams(next, { replace: true })
   }
 
+  const isBusy = (id: number, action: Busy["action"]) =>
+    busy.some((request) => request.id === id && request.action === action)
+  const startBusy = (request: Busy) => setBusy((current) => [...current, request])
+  const endBusy = (request: Busy) =>
+    setBusy((current) => current.filter((item) => item !== request))
+
   const handleRemove = async (id: number) => {
+    const request: Busy = { id, action: "remove" }
     setActionError(null)
-    setBusy({ id, action: "remove" })
+    startBusy(request)
     try {
       await removeMyOpenHouse(id).unwrap()
     } catch (err) {
@@ -105,13 +113,14 @@ export default function MyOpenHouses() {
         setActionError(C.REMOVE_ERROR)
       }
     } finally {
-      setBusy(null)
+      endBusy(request)
     }
   }
 
   const handleMarkAttended = async (id: number) => {
+    const request: Busy = { id, action: "mark" }
     setActionError(null)
-    setBusy({ id, action: "mark" })
+    startBusy(request)
     try {
       await markAttended(id).unwrap()
     } catch (err) {
@@ -121,7 +130,7 @@ export default function MyOpenHouses() {
         setActionError(C.MARK_ERROR)
       }
     } finally {
-      setBusy(null)
+      endBusy(request)
     }
   }
 
@@ -161,8 +170,8 @@ export default function MyOpenHouses() {
               key={item.myOpenHouseId}
               item={item}
               nowMs={nowMs}
-              removing={busy?.id === item.myOpenHouseId && busy.action === "remove"}
-              marking={busy?.id === item.myOpenHouseId && busy.action === "mark"}
+              removing={isBusy(item.myOpenHouseId, "remove")}
+              marking={isBusy(item.myOpenHouseId, "mark")}
               onRemove={(id) => {
                 void handleRemove(id)
               }}

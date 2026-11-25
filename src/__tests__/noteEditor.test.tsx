@@ -189,3 +189,14 @@ describe("NoteEditor: an item with a note", () => {
     expect(await screen.findByRole("button", { name: C.ADD_LABEL(SUBJECT) })).toBeInTheDocument()
   })
 })
+
+describe("NoteEditor: focus", () => {
+  it("puts the cursor in the text box when it opens", async () => {
+    const user = userEvent.setup()
+    render(editor(null))
+
+    await user.click(addButton())
+
+    expect(textBox()).toHaveFocus()
+  })
+})

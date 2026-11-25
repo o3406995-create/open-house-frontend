@@ -20,6 +20,9 @@ jest.mock("@/store/propertiesApi", () => ({
   useGetMyOpenHousesQuery: (timeZone: string, options?: unknown) => mockUseList(timeZone, options),
   useRemoveMyOpenHouseMutation: () => [() => Promise.resolve()],
   useMarkMyOpenHouseAttendedMutation: () => [() => Promise.resolve()],
+  useCreateNoteMutation: () => [() => Promise.resolve()],
+  useUpdateNoteMutation: () => [() => Promise.resolve()],
+  useDeleteNoteMutation: () => [() => Promise.resolve()],
 }))
 
 jest.mock("@/components/myOpenHouses/myOpenHousesMap", () => ({

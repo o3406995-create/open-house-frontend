@@ -6,3 +6,4 @@ export { PROPERTYDETAILS_CONSTANTS as propertyDetailsConstants } from './propert
 export { API_CONSTANTS as apiConstants } from './apiConstant';
 export { SAVEDPROPERTIES_CONSTANTS as savedPropertiesConstants } from './savedPropertiesConstant';
 export { MYOPENHOUSES_CONSTANTS as myOpenHousesConstants } from './myOpenHousesConstant';
+export { NOTES_CONSTANTS as notesConstants } from './notesConstant';

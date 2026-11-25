@@ -2,6 +2,7 @@ import { API_BASE_URL } from "@/config/apiBaseUrl"
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { myOpenHousesConstants as M } from "@/common/constants"
 import { tagsToInvalidate } from "@/utils/myOpenHouses"
+import { shouldRefreshAfter } from "@/utils/notes"
 
 export interface OpenHouseDTO {
   externalId: string
@@ -63,6 +64,30 @@ export interface PropertySearchParams {
   auctionOnly?: boolean
 }
 
+// The note of the user on an item of the saved properties list or of My Open Houses
+export interface NoteSummaryDTO {
+  noteId: number
+  content: string
+  updatedAt: string
+}
+
+// What creating or changing a note returns
+export interface NoteDTO extends NoteSummaryDTO {
+  savedPropertyId: number | null
+  userOpenHouseId: number | null
+  createdAt: string
+}
+
+// A note belongs to exactly one of a saved property and an entry in My Open Houses
+export type CreateNoteParams =
+  | { savedPropertyId: number; content: string }
+  | { userOpenHouseId: number; content: string }
+
+export interface UpdateNoteParams {
+  noteId: number
+  content: string
+}
+
 // AVAILABLE: fresh data. REMOVED: the data source no longer has the listing (stored snapshot).
 // UNKNOWN: it could not be checked (stored snapshot).
 export type ListingStatus = "AVAILABLE" | "REMOVED" | "UNKNOWN"
@@ -72,6 +97,8 @@ export interface SavedPropertyDTO {
   savedPropertyId: number
   savedAt: string
   listingStatus: ListingStatus
+  // The note of the user on this saved property; missing or null when there is none
+  note?: NoteSummaryDTO | null | undefined
   property: PropertySummaryDTO
 }
 
@@ -107,6 +134,8 @@ export interface MyOpenHouseItemDTO {
   attended: boolean
   group: MyOpenHouseGroup
   openHouse: OpenHouseDTO
+  // The note of the user on this entry; missing or null when there is none
+  note?: NoteSummaryDTO | null | undefined
   property: PropertySummaryDTO
 }
 
@@ -136,6 +165,13 @@ export interface AddMyOpenHouseParams {
 const baseUrl = API_BASE_URL
 
 const SAVED_PROPERTIES_TAG = "SavedProperties"
+
+// Both lists show the notes, so both are asked again after a change. A failure that changes
+// nothing leaves them alone.
+type NoteTag = typeof SAVED_PROPERTIES_TAG | typeof M.API_TAG
+
+const noteTags = (error: unknown): NoteTag[] =>
+  shouldRefreshAfter(error) ? [SAVED_PROPERTIES_TAG, M.API_TAG] : []
 
 export const propertiesApi = createApi({
   reducerPath: "propertiesApi",
@@ -225,6 +261,35 @@ export const propertiesApi = createApi({
         response.myOpenHouse,
       invalidatesTags: (_result, error) => tagsToInvalidate(error),
     }),
+
+    // Notes are shown inside the saved properties and My Open Houses lists
+    createNote: builder.mutation<NoteDTO, CreateNoteParams>({
+      query: (body) => ({
+        url: "/notes",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: { note: NoteDTO }) => response.note,
+      invalidatesTags: (_result, error) => noteTags(error),
+    }),
+
+    updateNote: builder.mutation<NoteDTO, UpdateNoteParams>({
+      query: ({ noteId, content }) => ({
+        url: `/notes/${noteId}`,
+        method: "PUT",
+        body: { content },
+      }),
+      transformResponse: (response: { note: NoteDTO }) => response.note,
+      invalidatesTags: (_result, error) => noteTags(error),
+    }),
+
+    deleteNote: builder.mutation<void, number>({
+      query: (noteId) => ({
+        url: `/notes/${noteId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, error) => noteTags(error),
+    }),
   }),
 })
 
@@ -238,4 +303,7 @@ export const {
   useAddMyOpenHouseMutation,
   useRemoveMyOpenHouseMutation,
   useMarkMyOpenHouseAttendedMutation,
+  useCreateNoteMutation,
+  useUpdateNoteMutation,
+  useDeleteNoteMutation,
 } = propertiesApi

@@ -3,6 +3,8 @@ import { Link } from "react-router-dom"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import SavedPropertyRow from "@/components/property/savedPropertyRow"
+import NoteEditor from "@/components/notes/noteEditor"
+import { savedPropertyTarget } from "@/utils/notes"
 import { useGetSavedPropertiesQuery, useRemoveSavedPropertyMutation } from "@/store/propertiesApi"
 import {
   loginPageConstants as L,
@@ -128,6 +130,13 @@ export default function SavedProperties() {
                 onRemove={(id) => {
                   void handleRemove(id)
                 }}
+                footer={
+                  <NoteEditor
+                    target={savedPropertyTarget(item.savedPropertyId)}
+                    note={item.note}
+                    subject={item.property.address}
+                  />
+                }
               />
             ))}
           </ul>

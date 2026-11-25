@@ -4,6 +4,8 @@ import { List, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import MessageCard from "@/components/messageCard"
 import MyOpenHouseRow from "@/components/myOpenHouses/myOpenHouseRow"
+import NoteEditor from "@/components/notes/noteEditor"
+import { myOpenHouseTarget } from "@/utils/notes"
 import MyOpenHousesMap from "@/components/myOpenHouses/myOpenHousesMap"
 import {
   useGetMyOpenHousesQuery,
@@ -178,6 +180,13 @@ export default function MyOpenHouses() {
               onMarkAttended={(id) => {
                 void handleMarkAttended(id)
               }}
+              footer={
+                <NoteEditor
+                  target={myOpenHouseTarget(item.myOpenHouseId)}
+                  note={item.note}
+                  subject={item.property.address}
+                />
+              }
             />
           ))}
         </ul>

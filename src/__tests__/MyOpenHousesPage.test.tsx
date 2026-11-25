@@ -23,6 +23,9 @@ jest.mock("@/store/propertiesApi", () => ({
   useGetMyOpenHousesQuery: (timeZone: string, options?: unknown) => mockUseList(timeZone, options),
   useRemoveMyOpenHouseMutation: () => [(id: number) => mockRemove(id)],
   useMarkMyOpenHouseAttendedMutation: () => [(id: number) => mockMark(id)],
+  useCreateNoteMutation: () => [() => Promise.resolve()],
+  useUpdateNoteMutation: () => [() => Promise.resolve()],
+  useDeleteNoteMutation: () => [() => Promise.resolve()],
 }))
 
 const HOUR = 60 * 60 * 1000

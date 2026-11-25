@@ -19,6 +19,8 @@ interface SavedPropertyRowProps {
   nowMs: number
   removing: boolean
   onRemove: (savedPropertyId: number) => void
+  // Shown under the row over its whole width (the note)
+  footer?: ReactNode
 }
 
 function Stat({ icon, value, label }: { icon: ReactNode; value: number; label: string }) {
@@ -31,7 +33,13 @@ function Stat({ icon, value, label }: { icon: ReactNode; value: number; label: s
   )
 }
 
-export default function SavedPropertyRow({ item, nowMs, removing, onRemove }: SavedPropertyRowProps) {
+export default function SavedPropertyRow({
+  item,
+  nowMs,
+  removing,
+  onRemove,
+  footer,
+}: SavedPropertyRowProps) {
   const { property, listingStatus } = item
   const removed = listingStatus === C.LISTING_STATUS_REMOVED
 
@@ -76,85 +84,88 @@ export default function SavedPropertyRow({ item, nowMs, removing, onRemove }: Sa
   }
 
   return (
-    <li className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-      <div className={`flex min-w-0 flex-1 items-center gap-4 ${removed ? "opacity-60" : ""}`}>
-        {property.thumbnailUrl ? (
-          <img
-            src={property.thumbnailUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-14 w-20 shrink-0 rounded-lg bg-slate-100 object-cover"
-          />
-        ) : (
-          <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
-            <ImageOff className="h-5 w-5" aria-hidden="true" />
-          </div>
-        )}
-
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-slate-900">{property.address}</p>
-          <p className="truncate text-sm text-slate-500">
-            {property.suburb} {property.state} {property.postcode}
-          </p>
-          {listingStatus === C.LISTING_STATUS_UNKNOWN && (
-            <p className="text-xs text-amber-600">{C.MAY_BE_OUT_OF_DATE}</p>
+    <li className="p-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className={`flex min-w-0 flex-1 items-center gap-4 ${removed ? "opacity-60" : ""}`}>
+          {property.thumbnailUrl ? (
+            <img
+              src={property.thumbnailUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-14 w-20 shrink-0 rounded-lg bg-slate-100 object-cover"
+            />
+          ) : (
+            <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+              <ImageOff className="h-5 w-5" aria-hidden="true" />
+            </div>
           )}
-          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
-            <Stat
-              icon={<BedDouble className="h-4 w-4" aria-hidden="true" />}
-              value={property.bedrooms}
-              label={C.BEDROOMS}
-            />
-            <Stat
-              icon={<Bath className="h-4 w-4" aria-hidden="true" />}
-              value={property.bathrooms}
-              label={C.BATHROOMS}
-            />
-            {property.carSpaces !== null && (
-              <Stat
-                icon={<Car className="h-4 w-4" aria-hidden="true" />}
-                value={property.carSpaces}
-                label={C.CAR_SPACES}
-              />
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-semibold text-slate-900">{property.address}</p>
+            <p className="truncate text-sm text-slate-500">
+              {property.suburb} {property.state} {property.postcode}
+            </p>
+            {listingStatus === C.LISTING_STATUS_UNKNOWN && (
+              <p className="text-xs text-amber-600">{C.MAY_BE_OUT_OF_DATE}</p>
             )}
-            <span className="font-medium text-slate-900">{property.displayPrice}</span>
+            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
+              <Stat
+                icon={<BedDouble className="h-4 w-4" aria-hidden="true" />}
+                value={property.bedrooms}
+                label={C.BEDROOMS}
+              />
+              <Stat
+                icon={<Bath className="h-4 w-4" aria-hidden="true" />}
+                value={property.bathrooms}
+                label={C.BATHROOMS}
+              />
+              {property.carSpaces !== null && (
+                <Stat
+                  icon={<Car className="h-4 w-4" aria-hidden="true" />}
+                  value={property.carSpaces}
+                  label={C.CAR_SPACES}
+                />
+              )}
+              <span className="font-medium text-slate-900">{property.displayPrice}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex min-w-0 items-center gap-3 sm:w-64">{openHouseBlock}</div>
+        <div className="flex min-w-0 items-center gap-3 sm:w-64">{openHouseBlock}</div>
 
-      <div className="flex items-center gap-2 sm:justify-end">
-        {removed ? (
-          <button
+        <div className="flex items-center gap-2 sm:justify-end">
+          {removed ? (
+            <button
+              type="button"
+              disabled
+              className={`${DETAILS_CLASS} cursor-not-allowed opacity-50`}
+            >
+              {C.VIEW_DETAILS}
+            </button>
+          ) : (
+            <Link
+              to={C.PROPERTY_ROUTE(property.externalId)}
+              className={`${DETAILS_CLASS} hover:bg-slate-50`}
+            >
+              {C.VIEW_DETAILS}
+            </Link>
+          )}
+          <Button
             type="button"
-            disabled
-            className={`${DETAILS_CLASS} cursor-not-allowed opacity-50`}
+            variant="ghost"
+            size="sm"
+            disabled={removing}
+            aria-label={C.REMOVE_LABEL(property.address)}
+            onClick={() => onRemove(item.savedPropertyId)}
+            className="text-slate-500 hover:text-red-600"
           >
-            {C.VIEW_DETAILS}
-          </button>
-        ) : (
-          <Link
-            to={C.PROPERTY_ROUTE(property.externalId)}
-            className={`${DETAILS_CLASS} hover:bg-slate-50`}
-          >
-            {C.VIEW_DETAILS}
-          </Link>
-        )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={removing}
-          aria-label={C.REMOVE_LABEL(property.address)}
-          onClick={() => onRemove(item.savedPropertyId)}
-          className="text-slate-500 hover:text-red-600"
-        >
-          <Trash2 className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline">{removing ? C.REMOVING : C.REMOVE}</span>
-        </Button>
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{removing ? C.REMOVING : C.REMOVE}</span>
+          </Button>
+        </div>
       </div>
+      {footer && <div className="mt-3 border-t border-slate-100 pt-3">{footer}</div>}
     </li>
   )
 }

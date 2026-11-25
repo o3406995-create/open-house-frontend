@@ -117,6 +117,7 @@ export default function NoteEditor({ target, note, subject }: NoteEditorProps) {
           aria-label={C.INPUT_LABEL(subject)}
           placeholder={C.PLACEHOLDER}
           rows={3}
+          autoFocus
           disabled={busy === "save"}
           className="w-full resize-y rounded-lg border border-slate-300 bg-white p-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />

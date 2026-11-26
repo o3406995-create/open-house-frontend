@@ -7,6 +7,7 @@ import { clearUser } from '@/store/authSlice'
 import { propertiesApi } from '@/store/propertiesApi'
 import { Button } from '@/components/ui/button'
 import NavbarSearch from '@/components/navbarSearch'
+import NotificationBell from '@/components/notifications/notificationBell'
 import ContentLayout from '@/layouts/contentLayout'
 import { authApi } from '@/api/auth'
 import { navbarConstants as C, searchPageConstants as S } from '@/common/constants'
@@ -24,12 +25,15 @@ interface UserActionsProps {
   onLogout: () => void
   onLogin: () => void
   onSignUp: () => void
+  // Called when the bell is followed, so that the mobile menu can close
+  onNavigate?: (() => void) | undefined
 }
 
-function UserActions({ userName, onLogout, onLogin, onSignUp }: UserActionsProps) {
+function UserActions({ userName, onLogout, onLogin, onSignUp, onNavigate }: UserActionsProps) {
   if (userName) {
     return (
       <>
+        <NotificationBell onNavigate={onNavigate} />
         <span className="text-sm font-medium text-slate-700">{C.GREETING(userName)}</span>
         <button
           type="button"
@@ -184,6 +188,7 @@ function App() {
               <UserActions
                 userName={userName}
                 onLogout={handleLogout}
+                onNavigate={closeMenu}
                 onLogin={() => {
                   closeMenu()
                   navigate('/login')

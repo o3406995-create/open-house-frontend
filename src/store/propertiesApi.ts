@@ -1,8 +1,9 @@
 import { API_BASE_URL } from "@/config/apiBaseUrl"
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { myOpenHousesConstants as M } from "@/common/constants"
+import { myOpenHousesConstants as M, notificationsConstants as N } from "@/common/constants"
 import { tagsToInvalidate } from "@/utils/myOpenHouses"
 import { shouldRefreshAfter } from "@/utils/notes"
+import { shouldRefreshAfterRead } from "@/utils/notifications"
 
 export interface OpenHouseDTO {
   externalId: string
@@ -162,6 +163,32 @@ export interface AddMyOpenHouseParams {
   openHouseExternalId: string
 }
 
+// A notification as the list endpoint returns it. The type is a plain string on purpose: the
+// server can add a type before this client knows it.
+export interface NotificationDTO {
+  notificationId: number
+  type: string
+  message: string
+  isRead: boolean
+  createdAt: string
+  openHouse: OpenHouseDTO
+  property: PropertySummaryDTO
+}
+
+export interface NotificationsPageDTO {
+  notifications: NotificationDTO[]
+  // How many there are in all, and how many of those are unread (not only on this page)
+  total: number
+  unreadCount: number
+  page: number
+  pageSize: number
+}
+
+export interface NotificationsParams {
+  page: number
+  pageSize: number
+}
+
 const baseUrl = API_BASE_URL
 
 const SAVED_PROPERTIES_TAG = "SavedProperties"
@@ -179,7 +206,7 @@ export const propertiesApi = createApi({
     baseUrl,
     credentials: "include",
   }),
-  tagTypes: [SAVED_PROPERTIES_TAG, M.API_TAG],
+  tagTypes: [SAVED_PROPERTIES_TAG, M.API_TAG, N.API_TAG],
   endpoints: (builder) => ({
     searchProperties: builder.mutation<PropertySummaryDTO[], PropertySearchParams>({
       query: (params) => ({
@@ -290,6 +317,24 @@ export const propertiesApi = createApi({
       }),
       invalidatesTags: (_result, error) => noteTags(error),
     }),
+
+    getNotifications: builder.query<NotificationsPageDTO, NotificationsParams>({
+      query: ({ page, pageSize }) => ({
+        url: "/notifications",
+        params: { page, pageSize },
+      }),
+      providesTags: [N.API_TAG],
+    }),
+
+    // A 404 means the notification is gone already, so the list is asked for again then as well
+    markNotificationRead: builder.mutation<NotificationDTO, number>({
+      query: (notificationId) => ({
+        url: `/notifications/${notificationId}/read`,
+        method: "PATCH",
+      }),
+      transformResponse: (response: { notification: NotificationDTO }) => response.notification,
+      invalidatesTags: (_result, error) => (shouldRefreshAfterRead(error) ? [N.API_TAG] : []),
+    }),
   }),
 })
 
@@ -306,4 +351,6 @@ export const {
   useCreateNoteMutation,
   useUpdateNoteMutation,
   useDeleteNoteMutation,
+  useGetNotificationsQuery,
+  useMarkNotificationReadMutation,
 } = propertiesApi

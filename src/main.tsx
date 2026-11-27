@@ -13,8 +13,9 @@ import RegisterPage from './pages/registerPage.tsx'
 import FindAgents from './pages/FindAgents.tsx'
 import MyOpenHouses from './pages/MyOpenHouses.tsx'
 import SavedProperties from './pages/SavedProperties.tsx'
+import Notifications from './pages/Notifications.tsx'
 import ProtectedRoute from './components/ProtectedRoute.tsx'
-import { propertyDetailsConstants as D } from '@/common/constants'
+import { notificationsConstants as N, propertyDetailsConstants as D } from '@/common/constants'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -59,6 +60,14 @@ createRoot(document.getElementById('root')!).render(
               element={
                 <ProtectedRoute>
                   <SavedProperties />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={N.ROUTE_PATTERN}
+              element={
+                <ProtectedRoute>
+                  <Notifications />
                 </ProtectedRoute>
               }
             />

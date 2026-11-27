@@ -42,7 +42,7 @@ export default function Notifications() {
   const [failedId, setFailedId] = useState<number | null>(null)
 
   // For an account that has no notifications the query is skipped, not made
-  const { data, isLoading, isFetching, refetch } = useGetNotificationsQuery(
+  const { data, currentData, isLoading, isFetching, refetch } = useGetNotificationsQuery(
     notificationsParams(page),
     {
       skip: !allowed,
@@ -53,6 +53,11 @@ export default function Notifications() {
     },
   )
   const [markRead] = useMarkNotificationReadMutation()
+
+  // True while another page is loading (the data of the page before is still shown). It is not true
+  // while the list is refreshed in the background every minute: that must not dim the list or lock
+  // the buttons.
+  const changingPage = isFetching && currentData === undefined
 
   const handleMarkRead = async (notificationId: number) => {
     setFailedId(null)
@@ -86,9 +91,9 @@ export default function Notifications() {
         <>
           <ul
             aria-label={N.LIST_LABEL}
-            aria-busy={isFetching}
+            aria-busy={changingPage}
             className={`divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white ${
-              isFetching ? "opacity-60" : ""
+              changingPage ? "opacity-60" : ""
             }`}
           >
             {data.notifications.map((item) => (
@@ -116,7 +121,7 @@ export default function Notifications() {
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={data.page <= 1 || isFetching}
+                disabled={data.page <= 1 || changingPage}
                 onClick={() => setPage(data.page - 1)}
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -126,7 +131,7 @@ export default function Notifications() {
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={data.page >= totalPages || isFetching}
+                disabled={data.page >= totalPages || changingPage}
                 onClick={() => setPage(data.page + 1)}
               >
                 {N.NEXT}

@@ -84,7 +84,7 @@ function answer(items: NotificationDTO[], overrides: Partial<NotificationsPageDT
     pageSize: 20,
     ...overrides,
   }
-  return { data, isLoading: false, isFetching: false, refetch: mockRefetch }
+  return { data, currentData: data, isLoading: false, isFetching: false, refetch: mockRefetch }
 }
 
 // The first notification is unread, the second one is read
@@ -274,5 +274,31 @@ describe("Notifications page", () => {
 
     expect(screen.getByText("Notification")).toBeInTheDocument()
     expect(screen.getByText("Open house tomorrow at 1 Example Street")).toBeInTheDocument()
+  })
+})
+
+describe("Notifications page: refreshing and changing page", () => {
+  // Three notifications, two to a page, so that there is a next page
+  const pageOne = () => answer([notification(1), notification(2)], { total: 3, pageSize: 2 })
+
+  it("does not dim the list or lock the buttons while it is refreshed in the background", () => {
+    // Fetching, and the data of this very page is there already
+    show({ query: () => ({ ...pageOne(), isFetching: true }) })
+
+    const list = screen.getByRole("list", { name: "Notifications" })
+    expect(list).toHaveAttribute("aria-busy", "false")
+    expect(list).not.toHaveClass("opacity-60")
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled()
+  })
+
+  it("dims the list and locks the buttons while another page is loading", () => {
+    // Fetching, and there is no data for this page yet: the page before is still shown
+    show({ query: () => ({ ...pageOne(), isFetching: true, currentData: undefined }) })
+
+    const list = screen.getByRole("list", { name: "Notifications" })
+    expect(list).toHaveAttribute("aria-busy", "true")
+    expect(list).toHaveClass("opacity-60")
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled()
   })
 })

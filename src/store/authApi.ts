@@ -12,7 +12,16 @@ export const authApi = createApi({
     getCurrentUser: builder.query<{ user: User }, void>({
       query: () => "/users/me",
     }),
+
+    // The browser tells which time zone it is on. The answer is the name the server stored.
+    setTimeZone: builder.mutation<{ timeZone: string }, string>({
+      query: (timeZone) => ({
+        url: "/users/me/time-zone",
+        method: "PUT",
+        body: { timeZone },
+      }),
+    }),
   }),
 })
 
-export const { useGetCurrentUserQuery } = authApi
+export const { useGetCurrentUserQuery, useSetTimeZoneMutation } = authApi

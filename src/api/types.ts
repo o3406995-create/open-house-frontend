@@ -4,6 +4,8 @@ export interface User {
   email: string
   role: string
   status: string
+  // The IANA time zone the browser last reported; missing or null until it has
+  time_zone?: string | null | undefined
 }
 
 export interface LoginRequest {

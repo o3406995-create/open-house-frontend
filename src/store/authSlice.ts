@@ -20,6 +20,10 @@ const authSlice = createSlice({
     clearUser: (state) => {
       state.user = null
     },
+    // The time zone the server stored for the user, so that nothing asks for it again
+    setUserTimeZone: (state, action: PayloadAction<string>) => {
+      if (state.user) state.user.time_zone = action.payload
+    },
   },
   extraReducers: (builder) => {
     // Stored in the same reducer pass as the response, so a route guard that sees the
@@ -30,5 +34,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { setUser, clearUser } = authSlice.actions
+export const { setUser, clearUser, setUserTimeZone } = authSlice.actions
 export default authSlice.reducer

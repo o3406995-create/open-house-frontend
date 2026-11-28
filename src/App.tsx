@@ -10,6 +10,7 @@ import NavbarSearch from '@/components/navbarSearch'
 import NotificationBell from '@/components/notifications/notificationBell'
 import ContentLayout from '@/layouts/contentLayout'
 import { authApi } from '@/api/auth'
+import TimeZoneReporter from '@/components/timeZoneReporter'
 import { navbarConstants as C, searchPageConstants as S } from '@/common/constants'
 import './App.css'
 
@@ -94,6 +95,7 @@ function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <TimeZoneReporter />
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-xl">
         <div className="flex items-center justify-between px-6 py-2 md:grid md:grid-cols-[1fr_auto_1fr]">
           <Link to="/" className="flex items-center gap-2 justify-self-start">
